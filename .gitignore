@@ -1,0 +1,18 @@
+# 不入库：上游源码 clone（各自有远端，不该在本仓重复存一份）
+sources/
+
+# 不入库：官方原始材料包（92 MB，单文件超 GitHub 100 MB 限）
+assets/
+
+# 不入库：早期按条目拆的只读快照（内容已被 zoo/ 覆盖，远端是已废弃的 sourcefind）
+bw-vllm-repo/
+kimi-repo/
+mimo-repo/
+k100ai-repo-artifacts/
+out/
+
+# 通用
+__pycache__/
+*.pyc
+.DS_Store
+*.tar
