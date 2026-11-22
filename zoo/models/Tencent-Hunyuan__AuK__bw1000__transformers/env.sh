@@ -14,7 +14,7 @@ export SERVED_NAME="auk"
 # 该镜像自带 DCU 版 torchaudio 2.9.0+das；vLLM 镜像无 torchaudio，而 PyPI 的 torchaudio
 # 是 CUDA/CPU 构建，装进去与 DCU 版 torch 不匹配。
 export IMAGE="image.ac.com:5000/dcu/linshp/base/mimo-sglang-bw10000:1.1.1"
-export HOST_IMAGE_TAR="/public/home/luql/archive/zoo-dcu-2026-11/images/mimo-sglang-bw10000_1.1.1.tar.gz"
+export HOST_IMAGE_TAR="/public/home/scnethr2601a10/zoo-images/mimo-sglang-bw10000_1.1.1.tar.gz"
 export FRAMEWORK="transformers"
 export CARD="BW1000"
 export PRECISION="bf16"

@@ -8,7 +8,7 @@ export MODEL_PATH="/models/QwenImage"
 export HOST_MODEL_PATH="/public/home/luql/models/Qwen-Image-2.1-Turbo"
 
 export IMAGE="image.ac.com:5000/dcu/linshp/base/mimo-sglang-bw10000:1.1.1"
-export HOST_IMAGE_TAR="/public/home/luql/archive/zoo-dcu-2026-11/images/mimo-sglang-bw10000_1.1.1.tar.gz"
+export HOST_IMAGE_TAR="/public/home/scnethr2601a10/zoo-images/mimo-sglang-bw10000_1.1.1.tar.gz"
 export FRAMEWORK="diffusers"
 export CARD="BW1000"
 export PRECISION="bf16"

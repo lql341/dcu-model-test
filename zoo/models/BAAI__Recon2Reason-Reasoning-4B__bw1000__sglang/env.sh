@@ -7,7 +7,7 @@ export HOST_MODEL_PATH="/public/home/luql/models/Recon2Reason-Reasoning-4B"
 export SERVED_NAME="recon2reason-4b"
 
 export IMAGE="image.ac.com:5000/dcu/linshp/base/mimo-sglang-bw10000:1.1.1"
-export HOST_IMAGE_TAR="/public/home/luql/archive/zoo-dcu-2026-11/images/mimo-sglang-bw10000_1.1.1.tar.gz"
+export HOST_IMAGE_TAR="/public/home/scnethr2601a10/zoo-images/mimo-sglang-bw10000_1.1.1.tar.gz"
 export FRAMEWORK="sglang"
 export CARD="BW1000"
 export PRECISION="bf16"

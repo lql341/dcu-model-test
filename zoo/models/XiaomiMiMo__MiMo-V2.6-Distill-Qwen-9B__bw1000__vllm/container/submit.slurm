@@ -46,7 +46,12 @@ for spec in "vLLM|$IMAGE|${HOST_IMAGE_TAR:-}" "CLI|$CLI_IMAGE|${HOST_CLI_TAR:-}"
 done
 
 # 仓库拷进 $WORK/repo（容器写产物后留在宿主机）
-mkdir -p "$WORK/repo" && cp -rf "$REPO"/. "$WORK/repo"/ 2>/dev/null
+mkdir -p "$WORK/repo"
+if [ "$(cd "$REPO" 2>/dev/null && pwd -P)" = "$(cd "$WORK/repo" 2>/dev/null && pwd -P)" ]; then
+  echo "[host] REPO 即 $WORK/repo，跳过自拷（避免递归嵌套，gotcha #33）"
+else
+  cp -rf "$REPO"/. "$WORK/repo"/ 2>/dev/null
+fi
 cleanup() { $PD rm -f vllm-srv >/dev/null 2>&1; }
 trap cleanup EXIT
 

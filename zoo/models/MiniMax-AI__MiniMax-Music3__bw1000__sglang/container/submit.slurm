@@ -29,7 +29,12 @@ echo "[host] node=$(hostname) tmp_free=${FREE}G"
 $PD image exists "$IMAGE" 2>/dev/null || $PD pull -q --tls-verify=false --cert-dir=/tmp/emptycerts "$IMAGE" >/tmp/pull-$JID.log 2>&1
 $PD image exists "$IMAGE" || { echo "[host] image unavailable"; tail -3 /tmp/pull-$JID.log; exit 1; }
 
-mkdir -p "$WORK/repo" && cp -rf "$REPO"/. "$WORK/repo"/ 2>/dev/null
+mkdir -p "$WORK/repo"
+if [ "$(cd "$REPO" 2>/dev/null && pwd -P)" = "$(cd "$WORK/repo" 2>/dev/null && pwd -P)" ]; then
+  echo "[host] REPO 即 $WORK/repo，跳过自拷（避免递归嵌套，gotcha #33）"
+else
+  cp -rf "$REPO"/. "$WORK/repo"/ 2>/dev/null
+fi
 echo "[host] run $(date +%T)"
 $PD run --rm --ipc=host --privileged --security-opt seccomp=unconfined --entrypoint=/bin/bash \
   --device /dev/kfd --device /dev/mkfd --device /dev/dri \

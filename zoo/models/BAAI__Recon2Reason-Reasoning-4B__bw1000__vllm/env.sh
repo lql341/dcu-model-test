@@ -7,7 +7,7 @@ export HOST_MODEL_PATH="/public/home/luql/models/Recon2Reason-Reasoning-4B"
 export SERVED_NAME="recon2reason-4b"
 
 export IMAGE="image.ac.com:5000/dcu/wqxyyt06/base/vllm0.21.0-ubuntu22.04-dtk2604-py3.10:v1"
-export HOST_IMAGE_TAR=""   # vLLM 无本地 tar，直接 pull
+export HOST_IMAGE_TAR="/public/home/luql/work/imgstore/vllm021.tar"
 export FRAMEWORK="vllm"
 export FRAMEWORK_VERSION="0.21.0（vllm0.21.0-ubuntu22.04-dtk2604-py3.10 镜像）"
 export CARD="BW1000"

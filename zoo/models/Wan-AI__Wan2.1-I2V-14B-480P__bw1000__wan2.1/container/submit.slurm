@@ -29,7 +29,12 @@ if [ -n "${HOST_IMAGE_TAR:-}" ] && [ -s "$HOST_IMAGE_TAR" ]; then $PD load -i "$
 $PD image exists "$IMAGE" 2>/dev/null || $PD pull --tls-verify=false --cert-dir=/tmp/emptycerts "$IMAGE" >/tmp/load-$JID.log 2>&1
 $PD image exists "$IMAGE" || { echo "[host] image unavailable"; tail -3 /tmp/load-$JID.log; exit 1; }
 
-mkdir -p "$WORK/repo" && cp -rf "$REPO"/. "$WORK/repo"/ 2>/dev/null
+mkdir -p "$WORK/repo"
+if [ "$(cd "$REPO" 2>/dev/null && pwd -P)" = "$(cd "$WORK/repo" 2>/dev/null && pwd -P)" ]; then
+  echo "[host] REPO 即 $WORK/repo，跳过自拷（避免递归嵌套，gotcha #33）"
+else
+  cp -rf "$REPO"/. "$WORK/repo"/ 2>/dev/null
+fi
 # 卡数：本集群不设 HIP_VISIBLE_DEVICES（实测 dcu:4 的作业里该变量为空/0），
 # 用 scontrol 查 AllocTRES 里的 gres/dcu 最可靠；退回 CUDA_VISIBLE_DEVICES 个数
 NCARD=$(scontrol show job -o "$SLURM_JOB_ID" 2>/dev/null | tr ' ' '\n' | grep -m1 -oE 'gres/dcu=[0-9]+' | cut -d= -f2)

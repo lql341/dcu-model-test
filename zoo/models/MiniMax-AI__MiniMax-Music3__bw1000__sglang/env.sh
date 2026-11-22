@@ -10,7 +10,7 @@ export SERVED_NAME="MiniMaxAI/MiniMax-Music3"
 
 # 镜像：BW 专用（41 层，压缩 12.27 GB），Harbor 上匿名可 pull
 export IMAGE="image.ac.com:5000/dcu/acizv7iztz/base/minimax-music3-bw-sglang:20261031-rc1"
-export HOST_IMAGE_TAR=""     # 上游无本地 tar；首次直接 pull（~3 min）
+export HOST_IMAGE_TAR="/public/home/scnethr2601a10/zoo-images/minimax-music3-bw-sglang_20261031-rc1.tar.gz"
 export FRAMEWORK="sglang"
 export FRAMEWORK_VERSION="0.5.12（镜像内 Hygon 构建）"
 export CARD="BW1000"

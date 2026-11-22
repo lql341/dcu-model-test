@@ -13,7 +13,7 @@
 ## 0. 前置检查（每次都做，2 分钟）
 
 ```bash
-# ① 定位 scnet.py 并确认认证已配（没配就先 `python3 $S init`）
+# ① 定位 scnet.py 并确认认证已配（没配就先 `python3 $S setup`）
 S="${SCNET_PY:-$HOME/Downloads/agent/skills/scnet-hpc/scripts/scnet.py}"
 python3 "$S" --region 20091 doctor
 
@@ -71,7 +71,7 @@ export HOST_CLI_TAR=""   # vLLM 条目用同镜像内 vllm bench serve，不需�
 `container/submit.slurm` 的加载顺序是「本地 tar → 失败才 pull」，设对了就不依赖网络。
 
 **空间要求**：单个镜像 load 后约 30 GB，`/tmp` 需要 ≥40 GB。
-本分区各节点在 21–320 GB 间波动，`submit.slurm` 里已有 `exit 42` 换节点逻辑。
+本分区各节点在 21–324 GB 间波动（2026-11-22 多次采样），`submit.slurm` 里已有 `exit 42` 换节点逻辑。
 **双镜像共存需 145 GB，实测反复失败**——所以 vLLM 条目改用同镜像内压测（gotcha #62/#63）。
 
 ---

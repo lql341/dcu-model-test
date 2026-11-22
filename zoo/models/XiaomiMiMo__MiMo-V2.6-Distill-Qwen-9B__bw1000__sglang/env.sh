@@ -10,7 +10,7 @@ export SERVED_NAME="mimo-v2.6-9b"
 
 # ---------- 镜像 / 框架 / 卡型 ----------
 export IMAGE="image.ac.com:5000/dcu/linshp/base/mimo-sglang-bw10000:1.1.1"
-export HOST_IMAGE_TAR="/public/home/scnethr2601a10/images/mimo-sglang-bw10000_1.1.1.tar"
+export HOST_IMAGE_TAR="/public/home/scnethr2601a10/zoo-images/mimo-sglang-bw10000_1.1.1.tar.gz"
 export FRAMEWORK="sglang"                              # sglang | vllm
 export CARD="BW1000"                                   # BW1000 | K100-AI（K500-SM 按 K100-AI 计）
 export PRECISION="bf16"                                # bf16 | int8 | int4

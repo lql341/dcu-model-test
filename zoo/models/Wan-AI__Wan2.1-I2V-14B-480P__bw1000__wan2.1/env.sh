@@ -13,7 +13,7 @@ export TASK="i2v-14B"
 # 用 SGLang 镜像：DTK 26.04 + DCU 版 torch 2.9（Wan2.1 官方代码的 flash_attn 会缺失，
 # wan/modules/attention.py 会自动回落到 torch.nn.functional.scaled_dot_product_attention）
 export IMAGE="image.ac.com:5000/dcu/linshp/base/mimo-sglang-bw10000:1.1.1"
-export HOST_IMAGE_TAR="/public/home/luql/archive/zoo-dcu-2026-11/images/mimo-sglang-bw10000_1.1.1.tar.gz"
+export HOST_IMAGE_TAR="/public/home/scnethr2601a10/zoo-images/mimo-sglang-bw10000_1.1.1.tar.gz"
 export FRAMEWORK="wan2.1"
 export CARD="BW1000"
 export PRECISION="bf16"

@@ -8,7 +8,7 @@ export HOST_MODEL_PATH="/public/home/scnethr2601a10/models/Trident-Qwen3VL-2B"
 export SERVED_NAME="trident-qwen3vl-2b"
 
 export IMAGE="image.ac.com:5000/dcu/linshp/base/mimo-sglang-bw10000:1.1.1"
-export HOST_IMAGE_TAR="/public/home/scnethr2601a10/images/mimo-sglang-bw10000_1.1.1.tar"
+export HOST_IMAGE_TAR="/public/home/scnethr2601a10/zoo-images/mimo-sglang-bw10000_1.1.1.tar.gz"
 export FRAMEWORK="sglang"
 export CARD="BW1000"
 export PRECISION="bf16"

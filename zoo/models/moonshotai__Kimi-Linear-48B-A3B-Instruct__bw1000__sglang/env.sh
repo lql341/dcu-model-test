@@ -10,7 +10,7 @@ export SERVED_NAME="kimi-linear-48b"
 
 # ---------- 镜像 / 框架 / 卡型 ----------
 export IMAGE="image.ac.com:5000/dcu/linshp/base/mimo-sglang-bw10000:1.1.1"
-export HOST_IMAGE_TAR="/public/home/scnethr2601a10/images/mimo-sglang-bw10000_1.1.1.tar"
+export HOST_IMAGE_TAR="/public/home/scnethr2601a10/zoo-images/mimo-sglang-bw10000_1.1.1.tar.gz"
 export FRAMEWORK="sglang"
 export CARD="BW1000"
 export PRECISION="bf16"

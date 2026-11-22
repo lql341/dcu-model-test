@@ -8,7 +8,7 @@ export HOST_MODEL_PATH="/public/home/scnethr2601a10/models/Qwen3-ForcedAligner-0
 export SERVED_NAME="qwen3-forcedaligner-0.6b"
 
 export IMAGE="image.ac.com:5000/dcu/linshp/base/vllm0.20-ubuntu22.04-dtk26.04-py3.10_qwen_asr1.7_bw:1.0.0"
-export HOST_IMAGE_TAR=""
+export HOST_IMAGE_TAR="/public/home/scnethr2601a10/zoo-images/vllm0.20-qwen_asr1.7_bw_1.0.0.tar.gz"
 export FRAMEWORK="transformers"
 export CARD="BW1000"
 export PRECISION="bf16"

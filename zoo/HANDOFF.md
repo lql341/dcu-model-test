@@ -22,7 +22,19 @@ python3 tools/check_products.py            # 期望：21 个目录，全部一�
 git log --oneline -1 -- models/Qwen__Qwen3-VL-8B-Instruct__bw1000__vllm  # 期望：有提交记录
 ```
 
-四条全过 = 你已具备接手条件。任何一条失败，先修环境，不要往下做实验。
+四条全过 = **文档与元数据自洽**（但 ≠ 能复现，见下）。任何一条失败，先修环境，不要往下做实验。
+
+> ⚠️ **lint 全绿只证明条目规范正确，不证明镜像/权重还在。** 真跑之前必须再确认两件事：
+>
+> ```bash
+> # ① 镜像 tar 是否存在（Harbor 已不可达，本地 tar 是唯一来源）
+> grep -h '^export HOST_IMAGE_TAR=' models/*/env.sh | sort | uniq -c
+> #   期望：路径都能对上 /public/home/scnethr2601a10/zoo-images/ 或 luql/work/imgstore/
+> #   2026-11-22 已批量修正为真实路径；HY-World-2.0 无归档（会显示警告注释）
+>
+> # ② 权重是否已在集群
+> python3 "$S" --region 20091 files --path /public/home/luql/models
+> ```
 
 **本目录的地图**：
 
@@ -510,7 +522,7 @@ S="${SCNET_PY:-$HOME/Downloads/agent/skills/scnet-hpc/scripts/scnet.py}"
 [ -f "$S" ] || echo "⚠ scnet.py 不在默认路径，请先设置 SCNET_PY"
 
 # 首次配置（交互式；AK/SK 在本机隐藏输入框填写，不要贴进聊天或写进任何文件）
-python3 $S init
+python3 $S setup          # 注意：子命令是 setup，不是 init
 #   需要：平台用户名 + AK + SK
 #   从哪里取：登录 SCNet → 个人中心 → 访问控制 → 生成并下载授权码，
 #              AK/SK 分别取该文件的 Accesskey / Secretkey 列

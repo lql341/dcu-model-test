@@ -53,7 +53,11 @@ done
 
 # 仓库拷进 $WORK/repo（容器写产物后留在宿主机）
 mkdir -p "$WORK/repo"
-rsync -a --exclude bench --exclude official-eval "$REPO"/ "$WORK/repo"/ 2>/dev/null
+if [ "$(readlink -f "$REPO")" = "$(readlink -f "$WORK/repo")" ]; then
+  echo "[host] REPO 即 $WORK/repo，跳过自拷（避免递归嵌套，gotcha #33）"
+else
+  rsync -a --exclude bench --exclude official-eval "$REPO"/ "$WORK/repo"/ 2>/dev/null
+fi
 chmod -R a+rwX "$WORK/repo" 2>/dev/null
 # 收容器前先把服务端日志落盘，否则 500/崩溃的根因随容器消失（踩过：只剩 1 行 digest）
 cleanup() { $PD logs vllm-srv > "$WORK/vllm-logs-$JID.txt" 2>&1; $PD rm -f vllm-srv >/dev/null 2>&1; }

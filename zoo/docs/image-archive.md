@@ -10,8 +10,13 @@
 ## 归档位置
 
 ```
-/public/home/luql/archive/zoo-dcu-2026-11/images/  ← 项目结项后的唯一位置（原 scnethr 账号已被回收）
-（历史位置：/public/home/scnethr2601a10/zoo-images/）
+⚠️ 2026-11-22 实测：`/public/home/luql/archive/zoo-dcu-2026-11/images/` 已不存在（911020 File does not exist）。
+   现存镜像本体在下面两个位置：
+   /public/home/scnethr2601a10/zoo-images/     ← 3 个 tar.gz（SGLang / Music3 / vLLM 0.20）
+   /public/home/luql/work/imgstore/vllm021.tar ← vLLM 0.21（30.5 GiB 未压缩）
+   各条目 env.sh 的 HOST_IMAGE_TAR 已按此更新（2026-11-22）。
+
+（以下为历史清单，供核对 sha256）
 ├── mimo-sglang-bw10000_1.1.1.tar.gz             7.9 GB  sha256 f16125ba…
 ├── vllm0.20-ubuntu22.04-dtk26.04-py3.10_qwen_asr1.7_bw_1.0.0.tar.gz         8.7 GB  sha256 986f95a3…
 ├── README.md                                    入口：目录约定 + 校验 + 还原 + 条目映射

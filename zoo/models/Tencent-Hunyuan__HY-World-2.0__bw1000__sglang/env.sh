@@ -7,7 +7,7 @@ export MODEL_PATH="/models/HY-World-2.0"
 export HOST_MODEL_PATH="/public/home/luql/models/HY-World-2.0"
 
 export IMAGE="image.ac.com:5000/dcu/acizv7iztz/base/hy-world2-bw-sglang:20261103-rc1"
-export HOST_IMAGE_TAR=""
+export HOST_IMAGE_TAR=""   # ⚠️ 该镜像无本地归档，Harbor 不可达时无法加载（见 HANDOFF §6）
 export FRAMEWORK="sglang"
 export FRAMEWORK_VERSION="vLLM 无；SGLang Diffusion 接入 + 官方 WorldMirror PyTorch 管线"
 export CARD="BW1000"
