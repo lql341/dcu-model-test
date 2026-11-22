@@ -1,9 +1,11 @@
 # SCNet 侧原始产物位置
 
-> ⚠️ **2026-11-07 起 `scnethr2601a10` 被移出 BW1000 分区的 AllowAccounts**，集群侧数据随时可能被清空。
-> 三层保全现状与还原步骤见 **[docs/ARCHIVE-SUMMARY.md](docs/ARCHIVE-SUMMARY.md)**：
-> ① Git 双远端（代码与经验）→ ② 本机 `~/Downloads/pi-test/archive/` + **luql 郑州 `/public/home/luql/zoo-archive-2026-11/`**（产物与镜像）
-> → ③ 原集群（即将失效）。
+> ⚠️ **本文是 2026-11-09 的历史记录，路径大多已失效。**
+> **现状（2026-11-22）**：① 代码与经验 → GitHub `lql341/dcu-model-test`（`zoo/` 子目录，Apache-2.0）；
+> ② 产物与镜像 → 原 `archive/` 目录与 `~/Downloads/pi-test/archive/` **均已不可见**，
+> 现存镜像本体在 `luql:~/work/imgstore/` 与 `scnethr2601a10:~/zoo-images/`（见 `HANDOFF.md` §2.6）；
+> ③ 原集群账号已失效。
+> 还原步骤见 **[docs/repro.md](docs/repro.md)**（2026-11-22 已重写为 OpenAPI 方式）。
 
 所有数据目前落在临时 Slurm 账号名下。**GitHub 是本仓库的权威副本**，下列路径仅用于回溯。
 

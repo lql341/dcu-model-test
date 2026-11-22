@@ -1,90 +1,161 @@
-# 从归档重建一个条目（端到端）
+# 从零重建一个条目（端到端）
+
+> **2026-11-22 重写**。旧版本基于 `ssh zzeshell-hz1` + `sbatch` + `/public/home/luql/archive/zoo-dcu-2026-11/`，
+> 这三样现在**全部不可用**（SSH 报 `Permission denied (publickey)`、集群无外网、
+> archive 目录已不可见）。旧版留档在 git 历史里（`git log --follow docs/repro.md`）。
 
 目的：**换机器 / 上游镜像被删 / 临时账号回收**之后，仍能把任意条目跑到「出真产物」。
-所需素材只有两处：本仓库（脚本 + 日志 + 基准）与 `/public/home/luql/archive/zoo-dcu-2026-11/`（镜像 + wheel 集 + 官方产物）。
-权重不归档（ModelScope 可重下），但要确认版本。
 
-## 0. 前置检查（每次都做，30 s）
+所需素材：**本仓库**（脚本 + 日志 + 基准）+ **权重**（ModelScope 重下）+ **镜像**（本地 tar 归档）。
 
-```bash
-ssh zzeshell-hz1
-squeue -u scnethr2601a10                 # 分区只允许 hx1hdnormal
-df -h /public/home/scnethr2601a10 | tail -1   # 需要 155 G 以上余量才动镜像解包
-cd /public/home/luql/archive/zoo-dcu-2026-11 && sha256sum -c SHA256SUMS
-```
+---
 
-## 1. 还原镜像（一次一个，别连两个）
+## 0. 前置检查（每次都做，2 分钟）
 
 ```bash
-export XDG_RUNTIME_DIR=/tmp/xdg-$$ && mkdir -p $XDG_RUNTIME_DIR && chmod 700 $XDG_RUNTIME_DIR
-JID=${SLURM_JOB_ID:-$$}
-PD="podman --root /tmp/pr-$JID --runroot /tmp/prr-$JID --storage-driver overlay --storage-opt ignore_chown_errors=true"
-gunzip -c /public/home/luql/archive/zoo-dcu-2026-11/images/mimo-sglang-bw10000_1.1.1.tar.gz | $PD load     # 32.2 GB
-gunzip -c /public/home/luql/archive/zoo-dcu-2026-11/images/vllm0.20-ubuntu22.04-dtk26.04-py3.10_qwen_asr1.7_bw_1.0.0.tar.gz | $PD load # 29.6 GB
-$PD images --format '{{.Repository}}:{{.Tag}}'
+# ① 定位 scnet.py 并确认认证已配（没配就先 `python3 $S init`）
+S="${SCNET_PY:-$HOME/Downloads/agent/skills/scnet-hpc/scripts/scnet.py}"
+python3 "$S" --region 20091 doctor
+
+# ② 看队列有无空闲节点
+python3 "$S" --region 20091 resource-summary
+
+# ③ 确认镜像归档还在（这步最关键，Harbor 已不可达）
+ls -lh /public/home/luql/work/imgstore/vllm021.tar
+ls -lh /public/home/scnethr2601a10/zoo-images/*.tar.gz
 ```
 
-> 同一作业里连续 load 两个会 `no space left on device`（解压共需 62 GB）。分两次作业。
+任何一步失败先解决，不要往下走。
 
-## 2. 还原依赖 wheel（只有 AuK / Qwen-Image / ForcedAligner 需要）
+---
+
+## 1. 准备权重
+
+集群无外网，**必须本机下载后上传**（gotcha #60）：
 
 ```bash
-mkdir -p ~/wheels
-tar xzf /public/home/luql/archive/zoo-dcu-2026-11/assets/wheels-auk-cp310.tar.gz  -C ~/wheels   # -> ~/wheels/auk-fix
-tar xzf /public/home/luql/archive/zoo-dcu-2026-11/assets/wheels-qi-cp310.tar.gz   -C ~/wheels   # -> ~/wheels/qi2
-tar xzf /public/home/luql/archive/zoo-dcu-2026-11/assets/wheels-fa310.tar.gz      -C ~/wheels   # -> ~/wheels/fa310
+# 本机：按文件清单逐个下载（ModelScope），核对每个文件字节数
+#   清单 API: https://modelscope.cn/api/v1/models/<org>/<model>/repo/files
+#   单文件:   https://modelscope.cn/models/<org>/<model>/resolve/master/<filename>
+mkdir -p /tmp/dl_stage/model && cd /tmp/dl_stage/model
+#   ... curl -L -C - 逐个下载 ...
+
+# 上传到集群（upload 只收单文件）
+DEST=/public/home/luql/models/<模型名>/
+python3 "$S" --region 20091 mkdir "$DEST"
+for f in /tmp/dl_stage/model/*; do
+  python3 "$S" --region 20091 upload --cover "$f" "$DEST"
+done
+
+# 校验远端字节数
+python3 "$S" --region 20091 files --path "$DEST" | python3 -c "
+import json,sys; d=json.load(sys.stdin)
+print(len(d['files']),'files', round(sum(f['size'] for f in d['files'])/2**30,2),'GiB')"
+
+rm -rf /tmp/dl_stage        # 本机不留副本
 ```
 
-**这些是 cp310 轮子**（镜像 py3.10）。若自己重下，必须：
+已有权重可直接复用：`python3 "$S" --region 20091 files --path /public/home/luql/models` 列一下。
+
+---
+
+## 2. 准备镜像
+
+Harbor 不可达（gotcha #62），从本地 tar 加载。`env.sh` 里必须设：
 
 ```bash
-python3 -m pip download --no-deps --dest wheels --only-binary=:all: \
-  --platform manylinux2014_x86_64 --python-version 310 --implementation cp --abi cp310 <pkgs>
+export HOST_IMAGE_TAR="/public/home/luql/work/imgstore/vllm021.tar"          # 服务镜像
+export HOST_CLI_TAR=""   # vLLM 条目用同镜像内 vllm bench serve，不需要 CLI 镜像
 ```
 
-## 3. 取条目脚本并提交
+`container/submit.slurm` 的加载顺序是「本地 tar → 失败才 pull」，设对了就不依赖网络。
+
+**空间要求**：单个镜像 load 后约 30 GB，`/tmp` 需要 ≥40 GB。
+本分区各节点在 21–320 GB 间波动，`submit.slurm` 里已有 `exit 42` 换节点逻辑。
+**双镜像共存需 145 GB，实测反复失败**——所以 vLLM 条目改用同镜像内压测（gotcha #62/#63）。
+
+---
+
+## 3. 打 tar 上传并提交
 
 ```bash
-# 本机 → 集群
-rsync -az --exclude logs --exclude bench --exclude official-eval \
-  -e "ssh -o BatchMode=yes" \
-  models/<条目>/ zzeshell-hz1:/public/home/scnethr2601a10/work/zoo-<名>/
+# 打包条目（upload 只收单文件）
+cd /path/to/dcu-model-test/zoo
+tar czf /tmp/entry.tgz -C models/<条目目录> .
 
-# 提交（带磁盘重投循环：节点 /tmp 水位极不稳）
-ssh zzeshell-hz1 'cd /public/home/scnethr2601a10/work/zoo-<名> && \
-  for i in $(seq 1 12); do J=$(sbatch --parsable container/submit.slurm); sleep 25; \
-    if grep -qE "NOT_ENOUGH_SPACE|no space" slurm-$J.out 2>/dev/null; then echo "try$i space"; \
-    else echo "KEEP $J"; break; fi; done'
+# 上传
+WORK=/public/home/luql/work/<条目名>
+python3 "$S" --region 20091 mkdir  "$WORK"
+python3 "$S" --region 20091 upload --cover /tmp/entry.tgz "$WORK/"
+
+# 写一个入口脚本（解包 + 执行 submit.slurm），一起传上去
+cat > /tmp/entry.sh <<'EOM'
+#!/bin/bash
+set -uo pipefail
+WORK=/public/home/luql/work/<条目名>
+rm -rf "$WORK/repo" && mkdir -p "$WORK/repo"
+tar xzf "$WORK/entry.tgz" -C "$WORK/repo"
+cd "$WORK/repo" && export SLURM_SUBMIT_DIR="$WORK/repo"
+bash container/submit.slurm
+EOM
+python3 "$S" --region 20091 upload --cover /tmp/entry.sh "$WORK/"
+
+# 提交作业（--dcus 最小 1；--cpus 用 16）
+python3 "$S" --region 20091 submit --name <条目名> --queue hx1hdnormal \
+  --nodes 1 --dcus 1 --cpus 16 --memory 32GB --walltime 03:00:00 \
+  --work-dir "$WORK" --command "bash $WORK/entry.sh 2>&1 | tee $WORK/run.out"
+
+# 等待与取日志
+python3 "$S" --region 20091 --timeout 400 wait <JID>
+python3 "$S" --region 20091 download --cover "$WORK/run.out" /tmp/run.out
 ```
 
-## 4. 验收（别只看「作业 COMPLETED」）
+> ⚠️ `download` 不加 `--cover` 时若本地文件已存在会**静默返回旧文件**，
+> 排查时会看到过期内容。取日志一律加 `--cover`。
 
-| 检查 | 命令 / 判据 |
+---
+
+## 4. 判据：怎么算真的跑通了
+
+| 检查 | 期望 |
 | --- | --- |
-| 逐条状态 | `awk -F, 'NR>1{print $3}' 反馈表.csv \| sort \| uniq -c` → 应全为「成功」 |
-| 产物规格 | 音频：`wave` 读 24000 Hz / 1 ch / 16 bit；图像：全部 2048×2048 |
-| 时长/尺寸合规 | 与条件清单 `expected.duration_min_s` 逐条比对 |
-| 假数据探测 | 压测类必须过 `tools/preflight_lib.py`；`TTFT=0` 或吞吐 >9000 tok/s 一律当失败 |
-| 入档 | 反馈表 + eval_result + stats + 环境说明 → `official-eval/`；大产物不入库 |
+| `run.out` 里 `[host] server up after` | 有数值（说明服务起来了） |
+| `smoke.log` 的 `/health` | HTTP 200 |
+| `smoke.log` 里有图像请求 | 返回正确内容（不是 500） |
+| `bench/summary.md` | 有 6 行数据 |
+| `bench_vllm.sh` 的有效性校验 | `all valid` |
+| `verify.py` | 有官方基线才出分；没有则 `[BLOCKED]`（**这是对的，不要绕过**） |
 
-## 5. 归档新资产（用过就归档，不等「以后」）
+只看容器退出码会被 `verify.py` 的 `[BLOCKED]`（exit 1）掩盖成 `rc=2`，
+**必须看上面这几项实际产物**。
+
+---
+
+## 5. 回收产物入库
 
 ```bash
-# 新镜像
-podman save <img> | gzip -1 > /public/home/luql/archive/zoo-dcu-2026-11/images/<repo-basename>_<tag>.tar.gz
-# 并把新文件行追加到 /public/home/luql/archive/zoo-dcu-2026-11/SHA256SUMS
-
-# 新 wheel 集
-tar czf /public/home/luql/archive/zoo-dcu-2026-11/assets/wheels-<用途>-cp310.tar.gz -C ~/wheels <dir>
-cd /public/home/luql/archive/zoo-dcu-2026-11 && sha256sum images/*.tar.gz assets/*.tar.gz > SHA256SUMS
+for f in logs/env.log logs/smoke.log bench/summary.md bench/round1.jsonl bench/round2.jsonl; do
+  python3 "$S" --region 20091 download --cover "$WORK/repo/$f" "models/<条目>/$f"
+done
+# 服务端日志通常较大，压缩后入库
+python3 "$S" --region 20091 download --cover "$WORK/vllm-logs-<JID>.txt" /tmp/srv.log
+gzip -c /tmp/srv.log > models/<条目>/logs/server.log.gz
 ```
 
-然后更新 `/public/home/luql/archive/zoo-dcu-2026-11/SHA256SUMS` 与 `docs/image-archive.md` 的表。
+然后填 `meta.json`（`cold_start_s`、`throughput` 六项）与 README 对应章节，
+最后 `./tools/publish.sh "feat(<条目>): 新增"`。
 
-## 已知的坑（照抄会踩）
+---
 
-- `--entrypoint=/bin/bash` + 挂载 `container/inner.sh`，不要用 `podman run -c "..."`（`$` 被展开）
-- 必须传 `/dev/mkfd`，否则 HSA 枚举不到设备
-- `--root /tmp/pr-$JOBID` 每作业独立，否则上一个作业的 pause 状态会让 pull 秒失败
-- SGLang 加 `--attention-backend triton`（默认选到残包 aiter，首个 decode 就崩）
-- 压测 `MAX_LEN ≥ 20480`，否则 16K 档全 400 且被当成成功
+## 6. 常见失败
+
+| 现象 | 原因 | 解法 |
+| --- | --- | --- |
+| `NOT_ENOUGH_SPACE` + `exit 42` | 节点 `/tmp` 不足 | 重新 submit（会换节点），或等空间释放 |
+| `IMAGE_UNAVAILABLE` | 本地 tar 路径错 / tar 里 tag 与 `IMAGE` 不一致 | `tar xOf <tar> repositories` 核对 |
+| `no space left on device` 发生在 load 第二个镜像 | 双镜像共存需 145 GB | 改用同镜像压测（gotcha #62） |
+| `Repo id must be in the form 'repo_name'` | 压测容器漏挂 `-v $HOST_MODEL_PATH:/models/M:ro` | 补挂载 |
+| `OpenAI Chat Completions API URL must end with` | `--backend openai-chat` 默认 endpoint 错 | 加 `--endpoint /v1/chat/completions` |
+| `--random-input-len is too small` | `--random-range-ratio 1` 语义变了 | 去掉该参数 |
+
+更多见 `docs/gotchas.md`（63 条）。

@@ -1,4 +1,4 @@
-# scnet-dcu-model-zoo
+# dcu-model-test / zoo —— 国产 DCU 模型适配实测库
 
 国产异构加速卡（海光 DCU / BW1000 / K100-AI）上的**大模型推理适配实测库**。
 
@@ -8,13 +8,15 @@
 > 📄 **先读这个**：[docs/REPORT.md](docs/REPORT.md) —— BW1000 模型适配能力报告
 > 📊 **可视化报告**：[docs/report.html](docs/report.html) —— 单文件 HTML，汇总全部结果、数据与技术路线（`tools/gen_report.py` 生成）
 > 📦 **数据在哪**：[docs/ARCHIVE-SUMMARY.md](docs/ARCHIVE-SUMMARY.md) —— 三层保全与还原步骤（集群账号已被回收）
-> （20 个条目 / 935 条真实产物，官方 9 份清单全覆盖 / 5 个镜像归档 / 59 条踩坑 / 4 条硬约束 / 成本核算）。
+> （21 个条目 / 935 条真实产物，官方 9 份清单全覆盖 / 5 个镜像归档 / 63 条踩坑 / 4 条硬约束 / 成本核算）。
 >
 > **本仓库的第一原则：镜像与经验 > 比赛提交。**
 > 比赛提交是一次性的；「哪个参数能开、哪个版本能装、哪种现象会产出假数据」的经验，
 > 以及「上游随时可能删掉的那个镜像」，才是下次遇到同类国产卡时真正的起点。
-> 因此镜像归档（`docs/image-archive.md`，`/public/home/luql/archive/zoo-dcu-2026-11/`）、踩坑清单（`docs/gotchas.md`）
-> 与依赖 wheel 集都当作一等资产维护，并同步到 GitHub（`tools/publish.sh`；GitLab 远端已于 2026-11-21 移除）。
+> 因此镜像归档（清单见 `docs/image-archive.md`；**原 `/public/home/luql/archive/zoo-dcu-2026-11/`
+> 已于 2026-11-21 复核不可见**，现存镜像本体散落在原账号，见 `HANDOFF.md` §2.6）、
+> 踩坑清单（`docs/gotchas.md`）与依赖 wheel 集都当作一等资产维护，
+> 并同步到 GitHub `lql341/dcu-model-test`（`tools/publish.sh`）。
 
 ## 目录约定
 
@@ -80,12 +82,10 @@ python3 tools/gen_report.py      # 重新生成 docs/report.html（从 meta/benc
 | [Kimi-Linear-48B-A3B-Instruct](models/moonshotai__Kimi-Linear-48B-A3B-Instruct__bw1000__vllm/) | BW1000 ×4 | vllm | bf16 | ✅ 6 档基准 | 858.08 | 197.83 |
 <!-- MATRIX:END -->
 
-| 模型 | 参数/权重 | 卡型 | 框架 | 精度 | 状态 | 4K/c64 | 16K/c8 |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| [Kimi-Linear-48B-A3B](models/moonshotai__Kimi-Linear-48B-A3B-Instruct__bw1000__sglang/) | 48B/A3B · 91.5 GB | BW1000 ×4 | SGLang 0.5.10 | bf16 | ✅ 跑通 | 608.23 | 80.73 |
-| [MiMo-V2.6-Distill-Qwen-9B](models/XiaomiMiMo__MiMo-V2.6-Distill-Qwen-9B__bw1000__sglang/) | 9.4B · 18 GB | BW1000 ×1 | SGLang 0.5.10 | bf16 | ✅ 跑通 | 998.05 | 308.72 |
-| [MiMo-V2.6-Distill-Qwen-9B](models/XiaomiMiMo__MiMo-V2.6-Distill-Qwen-9B__bw1000__vllm/) | 9.4B · 18 GB | BW1000 ×1 | vLLM 0.20.0 | bf16 | ✅ 跑通 | 489.52 | 44.83 |
-| [Qwen3-ASR-1.7B](models/Qwen__Qwen3-ASR-1.7B__bw1000__vllm/) | 2.35B · 4.7 GB | BW1000 ×1 | vLLM 0.20.0 | bf16 | ✅ 语音链路通（bench 口径未下发） | — | — |
+> 上表由 `tools/gen_index.py` 从各条目 `meta.json` 生成，**是唯一的性能矩阵**。
+> 早期曾在这里手写第二张表，内含 2026-11-09 优化前数据（Kimi 608.23 等），
+> 与生成矩阵冲突，已于 2026-11-22 删除。历史数据见
+> `models/*/bench-baseline-v1/`。
 
 吞吐单位 tok/s，取 `bench/round2.jsonl` 的 `output_throughput`。
 
@@ -98,12 +98,14 @@ python3 tools/gen_report.py      # 重新生成 docs/report.html（从 meta/benc
 ## 快速上手
 
 ```bash
-git clone https://github.com/lql341/scnet-dcu-model-zoo
-cd scnet-dcu-model-zoo/models/moonshotai__Kimi-Linear-48B-A3B-Instruct__bw1000__sglang
-# 宿主机（Slurm 上，4 卡）
-sbatch container/submit.slurm
-# 或只验到 smoke
-SKIP_BENCH=1 sbatch --export=ALL container/submit.slurm
+git clone https://github.com/lql341/dcu-model-test
+cd dcu-model-test/zoo/models/moonshotai__Kimi-Linear-48B-A3B-Instruct__bw1000__sglang
+
+# ⚠️ 2026-11-22 起不能再用 sbatch（SSH 已失效），改走 OpenAPI：
+#   详见 zoo/HANDOFF.md §7「OpenAPI 通道」。要点：
+#   1) 条目打 tar → scnet.py upload（upload 只收单文件）
+#   2) scnet.py submit --command '解包并执行 container/submit.slurm'
+#   3) 用 --dcus 1 --cpus 16，--timeout 放子命令前
 ```
 
 ## 相关

@@ -387,5 +387,6 @@ sbatch sweeps/kimi-16k-020-restart.slurm      # NROUND=4，默认
 sbatch sweeps/kimi-16k-020-matrix.slurm       # A 档有数据即 exit 0
 ```
 
-⚠️ 提交前**必须先 `./tools/sync_remote.sh`**，否则远程 `zoo-sync` 的旧 `bench.sh`
-会被 rsync 进作业容器，有效性校验段会以 `NameError` 失败（gotchas #45）。
+⚠️ ~~提交前必须先 `./tools/sync_remote.sh`~~ —— **2026-11-22 起失效**（SSH 不可用）。
+当时的问题是：远程 `zoo-sync` 的旧 `bench.sh` 会被 rsync 进容器，有效性校验段以 `NameError` 失败（gotchas #45）。
+现在改为打 tar 后 `scnet.py upload`，每次都是全新解包，不存在"旧副本混入"的问题。

@@ -32,6 +32,7 @@ models/<org>__<model>__<card>__<framework>[__<precision>]/
 | `bench/NA.md` | ⚠️ | `meta.bench = no-material` 时必需 |
 | `verify.py` | ✅ | 精度验证；无官方基线时须主动 `[BLOCKED]` 退出 |
 | `preflight_lib.py` | ⚠️ | 用 `bench.sh` 的条目必需（压测前置校验） |
+| `bench_vllm.sh` | ⚠️ | **vLLM 条目**用它替代 `bench.sh`（同镜像内 `vllm bench serve`，见 gotcha #62/#63） |
 | `container/submit.slurm` | ✅ | 一键复现入口 |
 | `requirements-extra.txt` | ✅ | 无额外依赖时保留说明性注释，不要放空文件 |
 | `patches/` | ✅ | 无 patch 时留空目录 + `.gitkeep` |
@@ -98,6 +99,24 @@ models/<org>__<model>__<card>__<framework>[__<precision>]/
 - **本项目不自建镜像**；若某条目必须自建，在该条目放 `Dockerfile` 并在 README §3.1 说明
 - `lint` 会校验 `image.lock` 里的镜像路径与 `env.sh` 的 `IMAGE` 一致
 
+### 5.1 镜像必须能离线加载（2026-11-22 起的硬要求）
+
+本集群 Harbor 已不可达（`podman pull` 报 `no route to host`，gotcha #62），**不能指望 pull**。
+`env.sh` 里必须设本地归档路径：
+
+| 变量 | 指向 | 形态 |
+| --- | --- | --- |
+| `HOST_IMAGE_TAR` | 服务镜像的本地 tar | `podman load -i`（未压缩）或 `gunzip -c \| podman load`（.tar.gz） |
+| `HOST_CLI_TAR` | 压测客户端镜像（仅用 `bench.sh` 的条目需要） | 同上 |
+
+现有可用归档：
+
+- `luql:/public/home/luql/work/imgstore/vllm021.tar`（vLLM 0.21，31 GB 未压缩）
+- `scnethr2601a10:/public/home/scnethr2601a10/zoo-images/*.tar.gz`（vLLM 0.20 / mimo-sglang / Music3）
+
+`submit.slurm` 的加载顺序是「本地 tar → 失败才 pull」，所以设对了就不再依赖网络。
+tar 里的 tag 必须与 `IMAGE` 完全一致（`tar xOf <tar> repositories` 可查），否则 load 后要 retag。
+
 ## 6. 数据可信规则（红线）
 
 1. **不得编造任何数字**。精度分数必须有**官方基线**支撑；取不到就写 `[BLOCKED]`
@@ -147,16 +166,16 @@ vi models/<new>/README.md       # 技术报告
 
 # 3. 在集群上跑通（2026-11-22 起走 OpenAPI：SSH 已失效、集群无外网）
 #    详见 HANDOFF §7「OpenAPI 通道」。upload 只收单个文件，所以本地打 tar：
+#    先按 HANDOFF §7 定位 scnet.py 并配好认证，把路径设进 $S
+S="${SCNET_PY:-$HOME/Downloads/agent/skills/scnet-hpc/scripts/scnet.py}"
 tar czf /tmp/entry.tgz -C models/<new> .
-python3 ~/Downloads/agent/skills/scnet-hpc/scripts/scnet.py --region 20091 \
-  mkdir /public/home/luql/work/<new>
-python3 ~/Downloads/agent/skills/scnet-hpc/scripts/scnet.py --region 20091 \
-  upload /tmp/entry.tgz /public/home/luql/work/<new>/
+python3 "$S" --region 20091 mkdir  /public/home/luql/work/<new>
+python3 "$S" --region 20091 upload --cover /tmp/entry.tgz /public/home/luql/work/<new>/
 #    然后在 --command 里解包并执行 submit.slurm（脚本内已处理 REPO==WORK/repo 的自拷问题）
 
-# 4. 校验后入库
-./tools/lint_entry.sh models/<new>/
-python3 tools/gen_index.py        # 重生成 INDEX 与总矩阵
-./tools/check_quota.sh
-git add -A && git commit && git push
+# 4. 校验后入库（**用 publish.sh，不要手写 git add -A**）
+./tools/lint_entry.sh models/<new>/     # 单独确认新条目
+./tools/publish.sh "feat(<new>): 新增条目"   # 内含四件套四项 + 只提交 zoo/ + 推当前 origin
+
+# ⚠️ 不要在这里 `git add -A`：zoo/ 是总仓的子目录，会被扩大成整个总仓。
 ```

@@ -1,5 +1,16 @@
 # 归档总结（2026-11-09）
 
+> ⚠️ **本文是 2026-11-09 的历史快照，其中部分信息已过时。现状请以 `HANDOFF.md` 为准。**
+>
+> 已知过时项：
+>
+> | 本文写法 | 现状（2026-11-22） |
+> | --- | --- |
+> | GitLab `luql/scnet-dcu-model-zoo` 双远端同步 | GitLab 远端已于 2026-11-21 移除，现仅 GitHub |
+> | GitHub `lql341/scnet-dcu-model-zoo` | 该仓已归档只读，内容全在 `lql341/dcu-model-test` 的 `zoo/` 下 |
+> | 20 个条目 / 35 条坑 | 现为 21 个条目 / 63 条坑 |
+> | `luql:.../archive/zoo-dcu-2026-11/`（唯一副本） | 2026-11-21 复核时该目录已不可见，镜像本体散落在原账号（见 HANDOFF §2.6） |
+
 > 触发：`scnethr2601a10`（郑州 BW1000 临时账号）**2026-11-07 14:12 被移出分区 AllowAccounts**，
 > 提交作业全面被拒（时间线与证据见本文件 §时间线）。本文件记录"东西都搬去哪了、怎么还原、还缺什么"。
 
@@ -9,7 +20,7 @@
 
 | 层 | 位置 | 内容 | 状态 |
 | --- | --- | --- | --- |
-| ① 代码与经验（权威） | **GitHub `lql341/scnet-dcu-model-zoo`** + **GitLab `luql/scnet-dcu-model-zoo`** | 20 个条目、docs/gotchas（35 条坑）、REPORT.md、sweeps（调优过程）、official（官方条件清单） | ✅ 双远端同步 |
+| ① 代码与经验（权威） | **GitHub `lql341/dcu-model-test`**（`zoo/` 子目录；旧仓 `scnet-dcu-model-zoo` 已归档只读） | 21 个条目、docs/gotchas（63 条坑）、REPORT.md、sweeps（调优过程）、official（官方条件清单） | ✅ 单远端（GitLab 已于 2026-11-21 移除） |
 | ② 产物与归档（二进制） | **`luql:/public/home/luql/archive/zoo-dcu-2026-11/`（唯一副本，31 GB）** | 产物 + 3 个镜像 + wheel 集 + 源码 | ✅ 已完成（服务端直拷 + sha256 校验） |
 | ③ 原集群（仅历史） | `scnethr2601a10:~/work`、`~/zoo-images`、`~/models` | 同上 + 权重（可重下） | ⚠️ 该账号已失去分区权限，仅作溯源 |
 

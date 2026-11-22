@@ -385,7 +385,7 @@ a {{ color:var(--info); }}
 <tr><td>923 条官方条件产物</td><td class="mono">{ARCHIVE}/products/</td><td>与各条目 meta.json 的 ok 数一致</td></tr>
 <tr><td>调优原始数据 34 个 jsonl</td><td class="mono">{ARCHIVE}/products/optimizations/</td><td>§3 所有结论的证据</td></tr>
 <tr><td>cp310 轮子 4 套 + 源码 3 份</td><td class="mono">{ARCHIVE}/assets/ · sources/</td><td>包内 sha256 清单</td></tr>
-<tr><td>代码/文档/条件清单/日志</td><td>GitHub <code>lql341/scnet-dcu-model-zoo</code><br>GitLab <code>luql/scnet-dcu-model-zoo</code></td><td>双远端同 commit</td></tr>
+<tr><td>代码/文档/条件清单/日志</td><td>GitHub <code>lql341/dcu-model-test</code>（zoo/ 子目录）</td><td>Apache-2.0；旧仓 scnet-dcu-model-zoo 已归档只读</td></tr>
 </tbody>
 </table>
 
@@ -427,7 +427,7 @@ scontrol -a show partition hx1hdnormal | tr ' ' '\\n' | grep '^AllowAccounts=' \
 # 1) 恢复数据（不用重下权重）
 cd {ARCHIVE}/images && sha256sum -c ...               # 见 VERIFY.md
 tar xzf {ARCHIVE}/assets/wheels-auk-cp310.tar.gz -C ~/wheels
-git clone https://github.com/lql341/scnet-dcu-model-zoo.git ~/zoo
+git clone https://github.com/lql341/dcu-model-test.git ~/dcu-model-test && cd ~/dcu-model-test/zoo
 
 # 2) 补完唯一未完成的条目（OmniWeaving 剩 7 条，约 3.5 h）
 rsync -az {ARCHIVE}/products/omniweaving/ <host>:<...>/repo/official-eval/
@@ -456,7 +456,7 @@ sbatch --export=ALL,PROBE_ONLY=0 container/submit.slurm   # 自动跳过已有 5
 数据来源：仓库内 <code>models/*/meta.json</code>、<code>bench/round2.jsonl</code>、
 <code>docs/gotchas.md</code>、<code>sweeps/results-*.md</code>，由 <code>tools/gen_report.py</code> 生成。
 报告中每一个数字都能在上述文件中追到原始记录。<br>
-代码：GitHub <code>lql341/scnet-dcu-model-zoo</code> · GitLab <code>luql/scnet-dcu-model-zoo</code>　|　
+代码：GitHub <code>lql341/dcu-model-test</code>（Apache-2.0）　|　
 二进制归档：<code>{ARCHIVE}/</code>（历史口径 55 GB；2026-11-21 复核该目录已不可见，镜像本体在原账号，见 HANDOFF §2.6）
 </footer>
 </div>

@@ -75,7 +75,7 @@ torch.compile 缓存落在容器 `/root/.cache/vllm`，容器销毁即丢，所�
 ```bash
 # 条目已入库：models/Qwen__Qwen3-VL-8B-Instruct__bw1000__vllm/
 tar czf /tmp/e.tgz -C models/Qwen__Qwen3-VL-8B-Instruct__bw1000__vllm .
-S=~/Downloads/agent/skills/scnet-hpc/scripts/scnet.py
+S="${SCNET_PY:-$HOME/Downloads/agent/skills/scnet-hpc/scripts/scnet.py}"  # 见 HANDOFF §7
 python3 $S --region 20091 upload --cover /tmp/e.tgz /public/home/luql/work/qwenvl8b/
 python3 $S --region 20091 submit --name qwenvl8b --queue hx1hdnormal \
   --nodes 1 --dcus 1 --cpus 16 --memory 32GB --walltime 05:00:00 \

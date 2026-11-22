@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
-# 把本地 zoo 同步到 luql 的 zoo-sync（作业脚本从这里 rsync 到自己 WORK）。
+# ⛔ 已废弃（2026-11-22）：本脚本依赖 ssh + rsync，而集群 SSH 已不可用
+#    （ssh luql@<登录地址> → Permission denied (publickey)）。
+#
+#    现在改为：把条目打 tar → `scnet.py upload`（upload 只收单文件）
+#              → `submit --command` 里解包执行。见 HANDOFF §7「OpenAPI 通道」。
+#
+#    直接运行本脚本会立即报错退出（见下方 DEPRECATED 检查），避免误用后白等一轮调度。
+#
+# 原始用途（历史）：把本地 zoo 同步到 luql 的 zoo-sync（作业脚本从这里 rsync 到自己 WORK）。
 #
 # 为什么需要它：作业的 slurm 脚本在启动时 `rsync zoo-sync/<entry> -> $WORK/repo`。
 # 只改本地、忘了推远程，作业就会跑旧脚本。2026-11-15 因此让"有效性校验"带着
@@ -7,6 +15,16 @@
 #
 # 用法：./tools/sync_remote.sh [条目名 ...]      不给参数 = 全量 sweeps/ + models/ 下存在的条目
 set -uo pipefail
+
+cat >&2 <<'EOM'
+⛔ tools/sync_remote.sh 已废弃（2026-11-22）：SSH 不可用。
+
+   请改用 HANDOFF.md §7「OpenAPI 通道」：
+     1) 打 tar:   tar czf /tmp/entry.tgz -C models/<条目> .
+     2) 上传:     python3 $S --region 20091 upload --cover /tmp/entry.tgz <远端目录>/
+     3) 提交:     python3 $S --region 20091 submit ... --command '解包并执行 submit.slurm'
+EOM
+exit 1
 cd "$(dirname "$0")/.." || exit 1
 
 HOST='luql@zzeshell.scnet.cn'

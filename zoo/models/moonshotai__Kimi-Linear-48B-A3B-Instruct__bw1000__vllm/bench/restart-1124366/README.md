@@ -36,7 +36,12 @@
 
 ## 复现
 
+> ⚠️ **下面是 2026-11-15 当时的做法，2026-11-22 起已不可用**：SSH 失效，`sync_remote.sh`
+> 与 `sbatch` 均无法执行（见 `HANDOFF.md` §7）。留作历史记录。
+> 现在要复现，走「打包 → `scnet.py upload` → `submit --command 解包执行`」。
+
 ```bash
+# 历史做法（已失效，勿照抄）
 ./tools/sync_remote.sh                     # 必须先同步，否则远程 bench.sh 是旧版
 sbatch sweeps/kimi-16k-020-restart.slurm   # NROUND=4，默认
 ```

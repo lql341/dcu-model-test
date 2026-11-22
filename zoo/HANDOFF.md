@@ -1,7 +1,42 @@
-# HANDOFF —— 下一段推进的交接文档
+# HANDOFF —— 接手这个仓库时读这一份
 
-> 版本：2026-11-15（2026-11-21 复核修订）　**本文件是唯一有效的交接文档**（旧的 2026-11-14 版已删除，历史细节见 `docs/ARCHIVE-SUMMARY.md` 与 `docs/REPORT.md`）
+> 版本：2026-11-22（结构变更 + Qwen3-VL 收口）　**本文件是唯一有效的交接文档**
+> （旧的 2026-11-14 版已删除，历史细节见 `docs/ARCHIVE-SUMMARY.md` 与 `docs/REPORT.md`）
 > 项目性质：**能力沉淀，不是比赛提交**（2026-11-15 决策）。所有产出的第一价值是"下一个人能复用"。
+
+## 0.0 接手者必读：你在哪、先做什么
+
+**仓库结构（2026-11-22 变更）**：本目录是总仓 `lql341/dcu-model-test` 的 `zoo/` 子目录。
+总仓把原 `scnet-dcu-model-zoo`（现只读归档）并入，`zoo/` 就是原仓库的全部内容。
+变更细节见仓库根目录 `STRUCTURE-CHANGE.md`。
+
+**所有路径以本文件所在目录（`zoo/`）为基准**，不要用文档里可能残留的本机绝对路径。
+
+**接手自检（5 分钟，跑通说明环境与证据链都对）**：
+
+```bash
+cd zoo                                     # 从仓库根目录进来；若已在本目录则跳过
+./tools/lint_entry.sh                      # 期望：21 条目全部 ✓ 通过
+python3 tools/check_products.py            # 期望：21 个目录，全部一致
+./tools/check_quota.sh                     # 期望：OK
+git log --oneline -1 -- models/Qwen__Qwen3-VL-8B-Instruct__bw1000__vllm  # 期望：有提交记录
+```
+
+四条全过 = 你已具备接手条件。任何一条失败，先修环境，不要往下做实验。
+
+**本目录的地图**：
+
+| 路径 | 是什么 |
+| --- | --- |
+| `HANDOFF.md` | 本文件。进度、决策、待办、命令 |
+| `docs/gotchas.md` | **63 条踩坑**，按隐蔽度排序。踩之前先搜这里 |
+| `INDEX.md` | 实测索引（由 `meta.json` 生成，**勿手改**） |
+| `models/<org>__<model>__<card>__<framework>/` | 21 个条目，每个都是自包含的复现单元 |
+| `sweeps/` | 调优过程与结果记录（含本次集群出网、Qwen3-VL 两份证据） |
+| `official/` | 官方 T03/T04 条件清单（素材不入库，按 manifest 重领） |
+| `tools/` | lint / gen_index / quota / publish / preflight |
+| `docs/entry-spec.md` | 新增条目必须遵守的规范 |
+
 > 归档现状见 §0「归档」行与 §2.6：原 `luql:/public/home/luql/archive/zoo-dcu-2026-11/` 目录在 2026-11-21 OpenAPI 复核时已不可见，镜像本体仍散落在原账号（详见 §2.6）。
 
 ---
@@ -17,7 +52,7 @@
 | 阻塞 | **4 个**（Trident × SGLang/vLLM 架构未注册；Recon2Reason/RoboBrain × SGLang 于 2026-11-15 封存，见 gotcha #58） |
 | 踩坑 | **63 条**（`docs/gotchas.md`，按隐蔽度排序） |
 | 归档 | 历史口径 5 镜像 55 GB（规范前 31 GB）+ assets + sources + products；**2026-11-21 实测原 `archive/` 目录已不可见，镜像本体仍在原账号——见 §2.6**；`SHA256SUMS` 11/11 为历史校验结果 |
-| 代码同步 | GitHub `lql341/scnet-dcu-model-zoo` = 本地（每次改完 `tools/publish.sh`）。GitLab/sourcefind 远端已于 2026-11-21 按用户决定移除，不再维护 |
+| 代码同步 | GitHub **`lql341/dcu-model-test`**（本目录是它的 `zoo/` 子目录）= 本地。改完跑 `tools/publish.sh`。旧仓 `scnet-dcu-model-zoo` 已归档只读，**不要再推** |
 | **集群通道（2026-11-22 变化）** | ⚠️ **SSH 与集群外网双双失效**：`ssh luql@zzeshell.scnet.cn -p 65032` 报 `Permission denied (publickey)`；集群无公网路由（gotcha #60）。**`tools/sync_remote.sh` 与 `docs/entry-spec.md` §8 的 rsync/scp 流程已不可用**，作业提交与文件收发一律走 `scnet.py`（见 §7） |
 
 **本段最重要的四个教训**（写在这里，防止新会话重犯）：
@@ -54,14 +89,14 @@
 
 | 类别 | 数量 | 位置 |
 | --- | --- | --- |
-| 官方条件产物 | 935 条 | `archive/products/<model>/outputs/`，元数据同步在 `models/*/official-eval/` |
-| 重跑补档产物 | AuK 120 wav + Qwen-Image 180 PNG（2026-11-15） | `products/auk/`、`products/qi/` |
-| 6 档基准 | 8 条目 × 6 档 × 2 轮 | `models/*/bench/{summary.md,round1.jsonl,round2.jsonl}` |
+| 官方条件产物 | 935 条 | 元数据与样本在 `models/*/official-eval/`；原 `archive/products/` 已于 2026-11-21 复核不可见（见 §2.6） |
+| 重跑补档产物 | AuK 120 wav + Qwen-Image 180 PNG（2026-11-15） | 原 `archive/products/` 已不可见（§2.6）；样本本身在各条目 `official-eval/` |
+| 6 档基准 | 9 条目 × 6 档 × 2 轮 | `models/*/bench/{summary.md,round1.jsonl,round2.jsonl}` |
 | embedding 分档 | 6 档（items/s 口径） | `models/OpenBMB__Trident-Qwen3VL-2B__bw1000__transformers/bench/` |
-| 镜像 | 5 个 tar.gz（55 GB） | `archive/images/`，命名 `<仓库名>_<tag>.tar.gz` |
-| 源码 | AuK / Wan2.1 / OmniWeaving | `archive/sources/` |
-| 轮子 | cp310 多套（auk-fix / qi2 / omni-fix / wan-fix / trident） | `archive/assets/` 与 `~/wheels/` |
-| 经验 | 59 条踩坑 + 4 条有效硬约束（1 条已推翻） | `docs/gotchas.md`、`docs/REPORT.md` §4 |
+| 镜像 | 5 个 tar.gz（55 GB，历史口径） | 原 `archive/images/` 已不可见；现存本体散落在原账号，见 §2.6 |
+| 源码 | AuK / Wan2.1 / OmniWeaving | 原 `archive/sources/` 已不可见；上游可重新 clone（见仓库根 `sources/`，不入库） |
+| 轮子 | cp310 多套（auk-fix / qi2 / omni-fix / wan-fix / trident） | 原 `archive/assets/` 已不可见；`models/*/wheels/README.md` 有清单 |
+| 经验 | 63 条踩坑 + 4 条有效硬约束（1 条已推翻） | `docs/gotchas.md`、`docs/REPORT.md` §4 |
 
 **关键性能数字（引用以此为准）**
 
@@ -163,6 +198,12 @@
 
 ---
 
+## 3. 已完成的攻坚（P0，2026-11-15 收口，**不要重做**）
+
+本节记录 P0 三个子目标的过程与结论。**三项都已结束**：P0-A 解决、P0-B 判定外部阻塞停手、
+P0 闸门早已通过。留在这里是为了让接手者理解"为什么某些路走不通"，而不是让你重走一遍。
+
+若要复核，先读 §3.2 末尾每个子目标的「结论」段，再决定是否需要重跑命令。
 
 ### 3.1 先做 0 卡时闸门（**没通过就不要投人力**）
 
@@ -312,8 +353,9 @@ grep -rn "short_conv\|linear_attention\|gdn_attention\|causal_conv1d\|fused_recu
     旧的「缺 paged-attn 内核」解释（gotchas #21）是**崩溃后的表现**，已在 summary 中更正。
 - 成功判据：16K/c64 两轮都出数且 `mean_ttft_ms > 0`（用 `bench.sh` 的有效性校验）。
   ⚠️ **该有效性校验此前从未执行过**（heredoc 里两处 bug：`os` 未导入 + `ILENS` 未定义），
-  已于 2026-11-15 修复，见 gotchas #45。**改完必须 `./tools/sync_remote.sh`**，
-  否则远程 `zoo-sync` 的旧副本会被作业 rsync 进容器，校验段照样崩。
+  已于 2026-11-15 修复，见 gotchas #45。~~改完必须 `./tools/sync_remote.sh`~~
+  ⚠️ **该结论已于 2026-11-22 失效**：SSH 不可用，sync_remote.sh 已废弃。
+  现在改为把条目打 tar 后 `scnet.py upload`，作业里解包执行（见 §7「OpenAPI 通道」）。
 - ⚠️ **判定"跑完了"必须看 `Successful requests`，不能看进度条**（gotchas #50）。
   崩溃后失败请求会飞速把进度条刷到 100%。
 
@@ -365,7 +407,7 @@ grep -rn "short_conv\|linear_attention\|gdn_attention\|causal_conv1d\|fused_recu
 
 | # | 阻塞 | 现状与证据 | 起手动作 | 判据 |
 | --- | --- | --- | --- | --- |
-| 1 | **Trident × SGLang**（优先级下调） | `Qwen3VLForEmbedding` 未注册（`ValueError: Cannot find model module`）。gotcha #17 实测：SGLang 0.5.10/0.5.18/main 的 `qwen3_vl.py` 均只注册 `ForConditionalGeneration`，无 embedding 变体、也没有 `qwen3_vl_embedding.py`。**已有可用替代**：自建 serving（见下）。 | 若要原生支持需给 SGLang 打源码补丁（非注册插件可解），本地无源码、无卡时，未验证——不要照旧描述写"注册插件"当作可交付。实际交付用 `../OpenBMB__Trident-Qwen3VL-2B__bw1000__transformers/` 的自建 serving | 服务能起，`/v1/embeddings` 返回 2048 维归一化向量（自建 serving 已达成，22.8 条/s @512 tok） |
+| 1 | **Trident × SGLang**（优先级下调） | `Qwen3VLForEmbedding` 未注册（`ValueError: Cannot find model module`）。gotcha #17 实测：SGLang 0.5.10/0.5.18/main 的 `qwen3_vl.py` 均只注册 `ForConditionalGeneration`，无 embedding 变体、也没有 `qwen3_vl_embedding.py`。**已有可用替代**：自建 serving（见下）。 | 若要原生支持需给 SGLang 打源码补丁（非注册插件可解），本地无源码、无卡时，未验证——不要照旧描述写"注册插件"当作可交付。实际交付用 `models/OpenBMB__Trident-Qwen3VL-2B__bw1000__transformers/` 的自建 serving | 服务能起，`/v1/embeddings` 返回 2048 维归一化向量（自建 serving 已达成，22.8 条/s @512 tok） |
 | 2 | **Trident × vLLM**（优先级下调） | 同上；vLLM 0.20/0.21 均为架构级不支持。**旧方案有误**：本表原写"`--task embed`"，但该条目 README 实测 vLLM 0.20 `api_server` 报 `unrecognized arguments: --task`，嵌入模式由架构自动识别——`--task` 是新版写法，不适用 0.20。已有可用替代：自建 serving。 | 原生支持需给 vLLM 注册架构并改 ModelConfig 校验（框架补丁级），本地无法验证。**不要写 `--task embed`**。实际交付用自建 serving | 同上（自建 serving 已达成）；原生支持列 blocked 留证据 |
 | 3 | ~~**Kimi 16K/c64**~~ ✅ 已解决 | 见 §3.2 A：2026-11-15 17:27 终判，每轮重启服务后四轮全过（128/128、0 VMFault，稳态 283–287 tok/s），交付口径"单轮+重启服务" | 无需再做；引用时按 §3.2 A 数字 | 已达成 |
 | 4 | ~~**Qwen3-VL 类模型的 vLLM 带图崩溃**~~ ✅ 已解决（2026-11-21 复核） | vLLM 0.20 的 `deepstack tokens 72 > 67` 断言，**0.21 已删除该断言**（gotcha #27）。现有 RoboBrain/Recon2Reason × vLLM 0.21 条目的 `smoke.log` 实测 HTTP 200 + 纯文本/单图/多图（2 张）正确回答，`bench/summary.md` 6 档全绿。旧判据"4 图"查证为笔误：全仓无一处将 4 图作为该测试要求（其它"4 张"均指平台截图或 Kimi TP=4），T02 既定标准是 2 图 | 无需再做。若仍想扩模型，新建 Qwen3-VL-8B 条目属 §5（P2），不是本阻塞 | 带图（单图/2 图）请求 200 且无断言——已达成 |
@@ -382,6 +424,36 @@ grep -rn "short_conv\|linear_attention\|gdn_attention\|causal_conv1d\|fused_recu
 > "集群上能下"。权重必须**本机下载 → `scnet.py upload` 上传**（实测 16 MB/s 下、10 MB/s 上），
 > 16–33 GB 的单条目要先付 40–100 分钟搬运成本。评估新模型时把这段算进去。
 
+**权重从哪下、放哪**（照抄即可，已验证一次走通）：
+
+```bash
+# ① 本机下载（ModelScope，按文件清单逐个 curl -C - 续传）
+#    清单：https://modelscope.cn/api/v1/models/<org>/<model>/repo/files
+#    逐个：https://modelscope.cn/models/<org>/<model>/resolve/master/<filename>
+#    下完核对每个文件的字节数（不要只看文件个数）
+MODEL=Qwen3-VL-8B-Instruct
+LOCAL=/tmp/dl_stage/model          # 本机任意临时目录，用完即删
+
+# ② 上传到集群（upload 只收单个文件，所以要循环）
+DEST=/public/home/luql/models/$MODEL/
+python3 $S --region 20091 mkdir "$DEST"
+for f in "$LOCAL"/*; do
+  python3 $S --region 20091 upload --cover "$f" "$DEST"
+done
+
+# ③ 校验远端字节数（files 接口返回 size）
+python3 $S --region 20091 files --path "$DEST" | python3 -c "
+import json,sys; d=json.load(sys.stdin)
+print(len(d['files']),'files', sum(f['size'] for f in d['files'])/2**30,'GiB')"
+```
+
+**落点约定**：权重统一放 `/public/home/luql/models/<模型名>/`（不加版本号）。
+条目里用 `HOST_MODEL_PATH` 指向它，容器内挂到 `/models/M`。
+家目录约 85% 占用，**搬之前先看 `luql 家目录剩余空间`**，低于 40 GB 先清理（见 `docs/gotchas.md`）。
+
+**已有权重可直接复用**（不必重新搬）：
+`/public/home/luql/models/` 下有 Kimi、MiMo、Qwen3-VL-8B 等，用 `files` 接口列一下就知道。
+
 | 模型 | 体积 | 状态 |
 | --- | --- | --- |
 | `Qwen/Qwen3-VL-8B-Instruct` | 16.34 GiB | ✅ **已完成（2026-11-22）**：`models/Qwen__Qwen3-VL-8B-Instruct__bw1000__vllm/`，服务跑通（单图/双图均正确）、6 档全绿。详见 `sweeps/results-qwenvl8b-2026-11-22.md` |
@@ -395,7 +467,7 @@ grep -rn "short_conv\|linear_attention\|gdn_attention\|causal_conv1d\|fused_recu
 - 冷启动 360 s，其中 **torch.compile 占 ~124 s** 且缓存在容器内 `/root/.cache/vllm`，每次作业重付。
 
 新增条目照 `docs/entry-spec.md` 走（8 章 README + `env.sh` + `image.lock` + `bench/` + `logs/`），
-跑完必须过四件套（见 §7）。**§8 的 rsync/sbatch 步骤已失效**，改用 §7「OpenAPI 通道」。
+跑完必须过「四件套」（定义见 §7）。**§8 的 rsync/sbatch 步骤已失效**，改用 §7「OpenAPI 通道」。
 
 ---
 
@@ -428,10 +500,23 @@ A=/public/home/luql/archive/zoo-dcu-2026-11      # 已不可见，见 §2.6
 
 **OpenAPI 通道（当前唯一可用，`--region 20091`）**
 
-```bash
-S=~/Downloads/agent/skills/scnet-hpc/scripts/scnet.py
+**第 0 步：先定位 scnet.py 并配好认证**（没做这步，后面全部命令都会失败）
 
-python3 $S --region 20091 doctor            # 配置自检
+```bash
+# scnet.py 来自 scnet-hpc skill，路径因人而异。常见位置：
+#   ~/Downloads/agent/skills/scnet-hpc/scripts/scnet.py
+# 若不存在，先 `find $HOME -name scnet.py -path '*scnet-hpc*'` 定位，再设 S=<该路径>
+S="${SCNET_PY:-$HOME/Downloads/agent/skills/scnet-hpc/scripts/scnet.py}"
+[ -f "$S" ] || echo "⚠ scnet.py 不在默认路径，请先设置 SCNET_PY"
+
+# 首次配置（交互式；AK/SK 在本机隐藏输入框填写，不要贴进聊天或写进任何文件）
+python3 $S init
+#   需要：平台用户名 + AK + SK
+#   从哪里取：登录 SCNet → 个人中心 → 访问控制 → 生成并下载授权码，
+#              AK/SK 分别取该文件的 Accesskey / Secretkey 列
+#   凭据存在本机凭据库（Linux 用 libsecret），不在仓库里
+
+python3 $S --region 20091 doctor            # 配置自检：期望输出账号与 region 可用性
 python3 $S --region 20091 resource-summary  # 队列空闲节点
 python3 $S --region 20091 jobs              # 在跑作业（active）
 python3 $S --region 20091 job <JID>         # 单作业状态
@@ -457,13 +542,25 @@ python3 $S --region 20091 submit --name <名> --queue hx1hdnormal \
 
 **本机仓库与工具链**
 
+**「四件套」的唯一定义**（本文件其它地方提到"四件套"都指这四项）：
+
+| # | 命令 | 检查什么 | 期望 |
+| --- | --- | --- | --- |
+| 1 | `./tools/lint_entry.sh` | 21 个条目是否符合 `entry-spec` | `全部通过` |
+| 2 | `python3 tools/check_products.py` | 条目产物与 `meta.json` 统计是否一致 | `21 个目录，全部一致` |
+| 3 | `./tools/check_quota.sh` | 仓库体积是否超限 | `OK` |
+| 4 | `python3 tools/gen_index.py` | 重生成 `INDEX.md` 与 `README.md` 总矩阵 | 无报错 |
+
+`./tools/publish.sh "msg"` 会**依次跑完上述四项**（顺序为 1→2→4→3），然后 commit + push。
+**所以日常只需跑 publish.sh**；想在提交前单独确认某一项时，才逐条跑上表。
+
 ```bash
-cd ~/Downloads/agent/repo/dcu-model-test/zoo    # 2026-11-15 起的仓库位置（旧的 pi-test/zoo 已不存在）
+# 在 zoo/ 目录下执行（本文件所在目录）；总仓根目录在其上一级
 ./tools/lint_entry.sh          # 条目规范（8 章 README、image.lock、logs、bench 一致性）
 python3 tools/gen_index.py     # 重生成 INDEX.md 与 README 总矩阵
 ./tools/check_quota.sh         # 配额/体积检查
-python3 tools/check_products.py# 20 个条目产物与 stats 一致性
-python3 tools/gen_report.py    # 重生成 docs/REPORT.md 的统计段
+python3 tools/check_products.py   # 21 个条目产物与 stats 一致性
+python3 tools/gen_report.py    # 重生成 docs/report.html（单文件 HTML 报告；不改 REPORT.md）
 ./tools/publish.sh "msg"       # commit + 推 GitHub（GitLab 远端已移除）
 # ./tools/sync_remote.sh       # ❌ 2026-11-22 起失效（依赖 ssh+rsync，SSH 已 Permission denied）
 #                              #    改用 scnet.py upload（单文件）+ submit --command，见上「OpenAPI 通道」
@@ -471,35 +568,54 @@ python3 tools/gen_report.py    # 重生成 docs/REPORT.md 的统计段
 
 **工作纪律（上一段总结出来的，务必遵守）**
 
-1. 四件套 + `publish.sh` 每轮都跑；数字口径靠脚本核，不靠人眼（`gen_report.py` 会打印条目/踩坑计数）。
+1. 每轮收尾跑 §7 定义的「四件套」；数字口径靠脚本核，不靠人眼（`gen_report.py` 会打印条目/踩坑计数）。
 2. **不许编造数据**：官方没下发的东西写 `[BLOCKED]`，不填估算值。
 3. 跑不通的配置**标 blocked 并留证据**，不许删条目。
 4. 每次踩坑立刻写 `docs/gotchas.md`（现象 / 判据 / 根因 / 解法 / 代价），一条不超 40 行。
 5. 容器里的日志必须落宿主机（`podman logs` / 子进程日志目录），否则容器一删根因就没了。
-6. 二进制只放 `archive/`，本机不留副本。
+6. 二进制只放集群 `archive/`，本机不留副本（例外：临时下载权重再 upload 时，用完即删）。
 
 ---
 
 ## 8. 新会话开场提示（可直接粘贴）
 
 ```
-读 ~/Downloads/agent/repo/dcu-model-test/zoo/HANDOFF.md 与 docs/gotchas.md 最新条目（现 63 条）。
+你是接手 lql341/dcu-model-test（zoo/ 子目录）的 agent。先读 zoo/HANDOFF.md 全文，
+再读 docs/gotchas.md（63 条）。本段是前置事实，先接受再动手。
 
-三条前置事实（2026-11-22 实测，先接受再动手）：
-1. SSH 已失效：ssh luql@zzeshell.scnet.cn -p 65032 → Permission denied (publickey)。
-   tools/sync_remote.sh 与 docs/entry-spec.md §8 的 rsync/scp/sbatch 流程都不可用。
-   提交与收发一律用 OpenAPI：python3 ~/Downloads/agent/skills/scnet-hpc/scripts/scnet.py
-   --region 20091 {submit,upload,download,files,job,wait,logs}。详见 §7「OpenAPI 通道」。
-   注意 upload 只收单文件；--dcus 最小 1（传 0 会被 QOS 拒）；--cpus 用 16。
+【一、你在哪】
+zoo/ 是总仓的子目录，等价于原 scnet-dcu-model-zoo（已归档只读）。
+所有路径以 zoo/ 为基准，不要用文档里残留的 ~/Downloads/... 本机路径。
+
+先跑 §0.0 的「接手自检」四条（lint / check_products / check_quota / git log），
+全过再往下做。
+
+【二、三条环境硬事实（2026-11-22 实测）】
+1. SSH 已失效：ssh luql@<旧登录地址> → Permission denied (publickey)。
+   tools/sync_remote.sh 与 docs/entry-spec.md §8 的 rsync/scp/sbatch 流程均不可用。
+   提交与收发一律走 OpenAPI 的 scnet.py（见 §7「OpenAPI 通道」）。
+   坑：upload 只收单文件；--dcus 最小 1（传 0 被 QOS 拒）；--cpus 用 16（8 会被 DefMemPerCPU 拒）；
+       --timeout 是全局参数，要放在子命令前。
 2. 集群无外网：DNS 与公网 IP:443 全不通，不是 DNS 故障（gotcha #60）。
-   权重只能本机下载（16 MB/s）→ upload（10 MB/s），16 GB 约 50 分钟。
+   权重只能本机下载（≈16 MB/s）→ upload（≈10 MB/s），16 GB 约 50 分钟。
    不要在集群上试 snapshot_download 或 pip install，会白等一轮调度。
-3. P0 已完成（2026-11-15），不要再从头做；P1 已无低风险项。
+3. Harbor 不可达：podman pull 报 no route to host（gotcha #62）。
+   镜像只能从本地 tar 加载：luql:~/work/imgstore/vllm021.tar（31 GB 未压缩）、
+   scnethr2601a10:~/zoo-images/*.tar.gz。新条目务必设 HOST_IMAGE_TAR。
 
-当前待办：§5 P2 扩模型。
-- Qwen/Qwen3-VL-8B-Instruct 进行中（2026-11-22）：条目骨架已建、权重搬运中，下一步是跑 smoke + 6 档。
-- Kimi-VL-A3B-Thinking（32.8 GB）搬之前先 0 卡时确认 vLLM 0.21 注册了 KimiVLForConditionalGeneration。
+【三、进度（2026-11-22）】
+P0 已完成（2026-11-15），不要再从头做。
+P1 已无明显低风险项（Trident 需框架补丁、Wan ulysses 受 xfuser 缺失阻塞，均留证据停手）。
+P2 扩模型：Qwen3-VL-8B × vLLM ✅ 已完成（21 条目，服务+6 档全绿，
+   见 sweeps/results-qwenvl8b-2026-11-22.md）。
+下一个候选：Kimi-VL-A3B-Thinking（32.8 GB）。搬之前先 0 卡时确认
+   vLLM 0.21 是否注册了 KimiVLForConditionalGeneration，否则会白搬 33 GB。
 
-资源现状（2026-11-22 实测）：hx1hdnormal 空闲 3 节点 / 2181 CPU；luql 家目录 85.1%（剩 216.6 GB）。
-每个结论都要有原始日志证据；四件套 + tools/publish.sh 收尾（仅推 GitHub，GitLab 已移除）。
+【四、交付纪律（硬性）】
+1. 数字必须有原始日志证据；官方没下发的写 [BLOCKED]，绝不填估算值。
+2. 跑不通的配置标 blocked 并留证据，不许删条目。
+3. 每次踩坑立刻写 docs/gotchas.md（现象/判据/根因/解法/代价，一条 ≤40 行）。
+4. 收容器前把 podman logs 落盘，否则根因随容器消失。
+5. 收尾跑 `./tools/publish.sh "msg"`，它内部会跑完「四件套」四项并提交推送（定义见 §7）。
+6. 新增条目照 docs/entry-spec.md（8 章 README + env.sh + image.lock + bench/ + logs/）。
 ```
