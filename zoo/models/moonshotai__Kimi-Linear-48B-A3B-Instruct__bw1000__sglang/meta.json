@@ -1,0 +1,29 @@
+{
+  "model_id": "moonshotai/Kimi-Linear-48B-A3B-Instruct",
+  "org": "moonshotai",
+  "model": "Kimi-Linear-48B-A3B-Instruct",
+  "card": "BW1000",
+  "cards_used": 4,
+  "tp": 4,
+  "framework": "sglang",
+  "framework_version": "0.5.10rc0+das.opt2.alpha.dtk2604",
+  "precision": "bf16",
+  "status": "bench",
+  "bench": "yes",
+  "bench_note": "",
+  "cold_start_s": [
+    280,
+    360
+  ],
+  "throughput": {
+    "4k_c1": 104.67,
+    "4k_c8": 353.53,
+    "4k_c64": 839.0,
+    "16k_c1": 50.8,
+    "16k_c8": 119.21,
+    "16k_c64": 234.17
+  },
+  "optimized": true,
+  "verified_on": "2026-10-31",
+  "optimization_note": "开启 CUDA Graph（去掉 --disable-cuda-graph）；6 档中 5 档大幅提升。原记「16K/c64 回退 6.3%」为单轮噪声（±7%），2026-11-05 复测已撤销，见 docs/REPORT.md §2.2"
+}

@@ -1,0 +1,28 @@
+{
+  "model_id": "OpenBMB/Trident-Qwen3VL-2B",
+  "org": "OpenBMB",
+  "model": "Trident-Qwen3VL-2B",
+  "card": "BW1000",
+  "cards_used": 1,
+  "tp": 1,
+  "framework": "sglang",
+  "framework_version": "0.5.10rc0+das.opt2.alpha.dtk2604",
+  "precision": "bf16",
+  "status": "blocked",
+  "bench": "no-material",
+  "bench_note": "框架不支持 Qwen3VLForEmbedding 架构，服务无法启动",
+  "cold_start_s": [
+    80,
+    150
+  ],
+  "throughput": {
+    "4k_c1": null,
+    "4k_c8": null,
+    "4k_c64": null,
+    "16k_c1": null,
+    "16k_c8": null,
+    "16k_c64": null
+  },
+  "optimized": false,
+  "verified_on": "2026-11-02"
+}

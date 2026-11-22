@@ -1,0 +1,55 @@
+{
+  "model_id": "Tencent-Hunyuan/HY-OmniWeaving",
+  "org": "Tencent-Hunyuan",
+  "model": "HY-OmniWeaving",
+  "card": "BW1000",
+  "cards_used": 1,
+  "tp": 1,
+  "framework": "hyvideo",
+  "framework_version": "官方代码（2026-11 clone）+ torch 2.9.0+das",
+  "precision": "bf16",
+  "status": "official-eval",
+  "bench": "not-required",
+  "bench_note": "官方 T03 明确「不进行统一评分和性能比较」；已按官方 60 条条件完成（832×480 / 81 帧 / 16 fps）",
+  "cold_start_s": [
+    600,
+    700
+  ],
+  "throughput": {
+    "4k_c1": null,
+    "4k_c8": null,
+    "4k_c64": null,
+    "16k_c1": null,
+    "16k_c8": null,
+    "16k_c64": null
+  },
+  "optimized": false,
+  "verified_on": "2026-11-12",
+  "official_eval": {
+    "conditions": "official/t03-t04/conditions/omniweaving.jsonl",
+    "total": 60,
+    "ok": 60,
+    "fail": 0,
+    "params": {
+      "width": 832,
+      "height": 480,
+      "num_frames": 81,
+      "fps": 16,
+      "num_inference_steps": 50,
+      "guidance_scale": 6.0,
+      "flow_shift": 7.0,
+      "think": false
+    },
+    "output": {
+      "kind": "video",
+      "width": 832,
+      "height": 480,
+      "frames": 81,
+      "fps": 16,
+      "dur_s": 5.06,
+      "bytes_total_MB": 19.2,
+      "spec_violation_count": 0
+    },
+    "note": "官方不要求评分；逐条用 mp4 header 校验时长/宽高，spec_violation_count=0；产物归档在 luql:archive/products/omniweaving/"
+  }
+}
