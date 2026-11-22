@@ -4,7 +4,23 @@
 > 2026-11-09 结项，定位是**能力沉淀，不是比赛提交**：所有产出的第一价值是"下一个人能复用"。
 
 本仓由原 `scnet-dcu-model-zoo` 并入而来（2026-11-22，`git subtree` 保留全部 119 次提交历史）。
-原仓库 `lql341/scnet-dcu-model-zoo` 保持不动，可归档。
+原仓库 `lql341/scnet-dcu-model-zoo` 已归档且只读，内容全部包含在本仓 `zoo/` 下。
+
+## 许可
+
+[Apache License 2.0](LICENSE)，Copyright 2026 lql341。
+
+覆盖本仓自有的脚本、文档、配置与 patch。**不含**下列内容：
+
+| 内容 | 说明 |
+| --- | --- |
+| `sources/`（未入库） | 上游模型源码，各自许可证见对应上游仓库（AuK / Wan2.1 / HY-World-2.0 / MiniMax-Music3 / OmniWeaving） |
+| 模型权重 | 从 ModelScope 下载，受各自模型许可约束，本仓不分发 |
+| 容器镜像 | 3 个来自第三方账号（`dcu/linshp`、`dcu/wqxyyt06`、`dcu/acizv7iztz`），非本项目构建 |
+| `assets/`（未入库） | 赛事官方材料，版权归发布方 |
+
+各条目若有第三方组件，会在该条目目录下用 `THIRD-PARTY.md` 记录来源与许可
+（目前 `OpenBMB__Trident-Qwen3VL-2B__bw1000__transformers/` 有一份：内嵌官方推理封装，MIT）。
 
 ## 目录
 
