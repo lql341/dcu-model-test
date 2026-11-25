@@ -10,11 +10,17 @@
 ## 归档位置
 
 ```
-⚠️ 2026-11-22 实测：`/public/home/luql/archive/zoo-dcu-2026-11/images/` 已不存在（911020 File does not exist）。
-   现存镜像本体在下面两个位置：
-   /public/home/scnethr2601a10/zoo-images/     ← 3 个 tar.gz（SGLang / Music3 / vLLM 0.20）
-   /public/home/luql/work/imgstore/vllm021.tar ← vLLM 0.21（30.5 GiB 未压缩）
-   各条目 env.sh 的 HOST_IMAGE_TAR 已按此更新（2026-11-22）。
+✅ 2026-11-25 现状：镜像本体**全部在 luql 名下**，运行时零依赖其他账号。
+   /public/home/luql/work/imgstore/
+   ├── vllm021.tar                                   30.5 GiB 未压缩（vLLM 0.21）
+   ├── mimo-sglang-bw10000_1.1.1.tar.gz               7.89 GiB（SGLang / 压测客户端）
+   ├── vllm0.20-qwen_asr1.7_bw_1.0.0.tar.gz           8.68 GiB（vLLM 0.20）
+   └── minimax-music3-bw-sglang_20261031-rc1.tar.gz  12.79 GiB（Music3）
+   合计约 60 GiB。各条目 env.sh 的 HOST_IMAGE_TAR 已全部指向此处。
+
+⚠️ 历史：`/public/home/luql/archive/zoo-dcu-2026-11/images/` 已于 2026-11-21 复核时不可见。
+   原临时账号 `scnethr2601a10/zoo-images/` 仍在（2026-11-25 实测可读），但该账号
+   2026-11-07 已被移出分区，**不要再把运行时路径指向它**。
 
 （以下为历史清单，供核对 sha256）
 ├── mimo-sglang-bw10000_1.1.1.tar.gz             7.9 GB  sha256 f16125ba…
@@ -30,8 +36,8 @@
 └── products/  sources/                          官方产物与上游源码（解包形态）
 ```
 
-> 2026-11-11 起，归档已迁至 `luql` 账户的 `/public/home/luql/archive/zoo-dcu-2026-11/`（原临时账号 `scnethr2601a10/zoo-images`
-> 仅作历史位置保留，该账号已于 2026-11-07 被移出分区允许列表）。
+> 2026-11-11 起，归档曾迁至 `luql` 账户的 `/public/home/luql/archive/zoo-dcu-2026-11/`（该目录 2026-11-21 已不可见）；
+> 2026-11-25 起统一放在 `/public/home/luql/work/imgstore/`。原临时账号 `scnethr2601a10` 已于 2026-11-07 被移出分区允许列表。
 >
 > **为什么把 wheel 也归档**：这两个镜像里没有 librosa / diffusers，而“按 cp312 下载的轮子
 > 装进 py3.10 镜像”曾把两个条目误判成 blocked（`docs/gotchas.md` #18）。镜像 + 正确的 wheel

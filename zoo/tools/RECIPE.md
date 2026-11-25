@@ -22,7 +22,7 @@
 image.ac.com:5000/dcu/linshp/base/mimo-sglang-bw10000:1.1.1
 ```
 - Harbor 匿名可拉，**不需要账号**（8 GiB 压缩 / 32.2 GB 解压 / 35 层）
-- 本地已缓存到 `/public/home/scnethr2601a10/images/mimo-sglang-bw10000_1.1.1.tar`（31 GB），用 `podman load` 约 70–290 s
+- 本地已缓存到 `/public/home/luql/work/imgstore/mimo-sglang-bw10000_1.1.1.tar.gz`（7.89 GiB），用 `podman load -i` 约 610 s（实测可直接读 .gz）
 - 镜像里自带一份**别人的**同题提交物：`/root/hackathon-mimo/`（env.sh / run.sh / smoke.sh / env_check.sh / env.log / smoke.log / README.md / test_acc.py），可作为报告撰写参考
 
 ## 3. 拉镜像 / 载入镜像 必须的参数
@@ -94,9 +94,12 @@ python3 -m sglang.launch_server \
 ## 6. 模型
 
 ```
-/public/home/scnethr2601a10/models/MiMo-V2.6-Distill-Qwen-9B   (18 GB, 18 files)
+/public/home/luql/models/MiMo-V2.6-Distill-Qwen-9B   (18 GB, 18 files)
 ```
 从 ModelScope 直连下载，**24 MB/s，3 分钟**（`snapshot_download`，不要走 dl_model.sh 的内置代理，它慢一倍）
+
+> ⚠️ 2026-11-22 起集群已无外网（gotcha #60），上面的「直连下载」不再可行，
+> 只能本机下载后 `scnet.py upload`。2026-11-25 该权重已迁到 `/public/home/luql/models/`。
 
 ## 7. 还差什么才能提交
 

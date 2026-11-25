@@ -20,9 +20,9 @@
 
 | 层 | 位置 | 内容 | 状态 |
 | --- | --- | --- | --- |
-| ① 代码与经验（权威） | **GitHub `lql341/dcu-model-test`**（`zoo/` 子目录；旧仓 `scnet-dcu-model-zoo` 已归档只读） | 21 个条目、docs/gotchas（63 条坑）、REPORT.md、sweeps（调优过程）、official（官方条件清单） | ✅ 单远端（GitLab 已于 2026-11-21 移除） |
-| ② 产物与归档（二进制） | **`luql:/public/home/luql/archive/zoo-dcu-2026-11/`（唯一副本，31 GB）** | 产物 + 3 个镜像 + wheel 集 + 源码 | ✅ 已完成（服务端直拷 + sha256 校验） |
-| ③ 原集群（仅历史） | `scnethr2601a10:~/work`、`~/zoo-images`、`~/models` | 同上 + 权重（可重下） | ⚠️ 该账号已失去分区权限，仅作溯源 |
+| ① 代码与经验（权威） | **GitHub `lql341/dcu-model-test`**（`zoo/` 子目录；旧仓 `scnet-dcu-model-zoo` 已归档只读） | 21 个条目、docs/gotchas（64 条坑）、REPORT.md、sweeps（调优过程）、official（官方条件清单） | ✅ 单远端（GitLab 已于 2026-11-21 移除） |
+| ② 产物与归档（二进制） | **`luql:~/work/imgstore/`（镜像 60 GiB）+ `~/models/`（权重）+ `~/src/` + `~/wheels/`** | 4 个镜像 tar + 15 个被引用模型权重 + 源码 + 轮子集 | ✅ **2026-11-25 已全部收拢到 luql 名下**（原 `archive/zoo-dcu-2026-11/` 于 2026-11-21 不可见） |
+| ③ 原集群（仅历史） | `scnethr2601a10:~/work`、`~/zoo-images`、`~/models` | 同上 + 权重（luql 名下已有副本） | ⚠️ 该账号 2026-11-07 已失去分区权限；文件仍可读但**运行时不得再依赖** |
 
 ---
 

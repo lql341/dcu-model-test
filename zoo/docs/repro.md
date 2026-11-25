@@ -22,7 +22,7 @@ python3 "$S" --region 20091 resource-summary
 
 # ③ 确认镜像归档还在（这步最关键，Harbor 已不可达）
 ls -lh /public/home/luql/work/imgstore/vllm021.tar
-ls -lh /public/home/scnethr2601a10/zoo-images/*.tar.gz
+ls -lh /public/home/luql/work/imgstore/*.tar.gz
 ```
 
 任何一步失败先解决，不要往下走。

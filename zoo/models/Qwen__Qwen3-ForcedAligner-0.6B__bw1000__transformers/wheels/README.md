@@ -46,5 +46,5 @@ export PYTHONPATH=/opt/fa-libs:$PYTHONPATH
 
 ## 放置位置
 
-集群上放在 `/public/home/scnethr2601a10/wheels/fa310/`，由 `env.sh` 的 `WHEELS_HOST` 指定，
+集群上放在 `/public/home/luql/wheels/fa310/`，由 `env.sh` 的 `WHEELS_HOST` 指定，
 容器内挂载为 `/wheels`。

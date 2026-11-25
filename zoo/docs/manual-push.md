@@ -96,7 +96,7 @@ $PD image inspect image.ac.com:5000/aihub/dcu/<账号>/mimo-sglang-bw10000:1.1.1
 
 ## 路径 B：离线 tar 推送（Harbor 上已没有，但本地有归档）
 
-归档位置：`/public/home/luql/archive/zoo-dcu-2026-11/images/`（luql 账户，项目结项后唯一副本；临时账号 `scnethr2601a10` 已于 2026-11-07 被回收）
+归档位置：`/public/home/luql/work/imgstore/`（luql 账户，2026-11-25 起镜像全部收拢于此；原 `archive/zoo-dcu-2026-11/images/` 已于 2026-11-21 不可见）
 
 ```bash
 # 1) 还原

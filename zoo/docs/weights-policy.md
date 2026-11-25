@@ -19,7 +19,7 @@
 
 | 日期 | 删除 | 大小 | 原因 | 重下命令 |
 | --- | --- | ---: | --- | --- |
-| 2026-11-03 | `Kimi-Linear-48B-A3B-Instruct` | 92 G | 给 Wan2.1（82 G）+ OmniWeaving（55 G）腾配额 | `python3 -c "from modelscope import snapshot_download as d; d('moonshotai/Kimi-Linear-48B-A3B-Instruct', local_dir='/public/home/scnethr2601a10/models/Kimi-Linear-48B-A3B-Instruct')"` |
+| 2026-11-03 | `Kimi-Linear-48B-A3B-Instruct` | 92 G | 给 Wan2.1（82 G）+ OmniWeaving（55 G）腾配额 | `python3 -c "from modelscope import snapshot_download as d; d('moonshotai/Kimi-Linear-48B-A3B-Instruct', local_dir='/public/home/luql/models/Kimi-Linear-48B-A3B-Instruct')"` |
 | 2026-11-04 | `AuK`、`AuK-Flash` | 12.6 G | 两个条目均已 120/120 完成并入库 | `d('Tencent-Hunyuan/AuK', …)` / `d('Tencent-Hunyuan/AuK-Flash', …)` |
 | 2026-11-04 | `Qwen2.5-Omni-3B` | 12 G | 仅作 AuK/AuK-Flash 的文本编码器，两者已完成 | `d('Qwen/Qwen2.5-Omni-3B', …)` |
 | 2026-11-04 | `Trident-Qwen3VL-2B` | 4 G | 架构不被 SGLang/vLLM 支持，已如实入库为 blocked | `d('OpenBMB/Trident-Qwen3VL-2B', …)` |

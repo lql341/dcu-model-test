@@ -1,23 +1,28 @@
 # SCNet 侧原始产物位置
 
 > ⚠️ **本文是 2026-11-09 的历史记录，路径大多已失效。**
-> **现状（2026-11-22）**：① 代码与经验 → GitHub `lql341/dcu-model-test`（`zoo/` 子目录，Apache-2.0）；
-> ② 产物与镜像 → 原 `archive/` 目录与 `~/Downloads/pi-test/archive/` **均已不可见**，
-> 现存镜像本体在 `luql:~/work/imgstore/` 与 `scnethr2601a10:~/zoo-images/`（见 `HANDOFF.md` §2.6）；
-> ③ 原集群账号已失效。
+> **现状（2026-11-25）**：① 代码与经验 → GitHub `lql341/dcu-model-test`（`zoo/` 子目录，Apache-2.0）；
+> ② 产物与镜像 → 原 `archive/` 目录与 `~/Downloads/pi-test/archive/` **均已不可见**；
+> **镜像与源码/权重现已全部收拢到 `luql` 名下**（`luql:~/work/imgstore/`、`~/src/`、`~/models/`、
+> `~/wheels/`），运行时不再依赖 `scnethr2601a10`（见 `HANDOFF.md` §2.7）；
+> ③ 原集群账号 `scnethr2601a10` 已失效（2026-11-07 移出分区），其目录仍可读但**不要再依赖**。
 > 还原步骤见 **[docs/repro.md](docs/repro.md)**（2026-11-22 已重写为 OpenAPI 方式）。
 
-所有数据目前落在临时 Slurm 账号名下。**GitHub 是本仓库的权威副本**，下列路径仅用于回溯。
+所有数据目前落在 `luql` 账号名下。**GitHub 是本仓库的权威副本**，下列路径仅用于回溯。
 
-## 郑州集群（BW1000，Slurm 账号 `scnethr2601a10`）
+## 郑州集群（BW1000）——历史布局（账号 `scnethr2601a10`，已废弃）
+
+> 下面这棵树是 2026-11-09 当时的布局，**已不是当前布局**。当前布局见
+> `HANDOFF.md` §2.7：权重在 `luql:~/models/`、镜像在 `luql:~/work/imgstore/`、
+> 源码在 `luql:~/src/`、轮子在 `luql:~/wheels/`。
 
 ```
 /public/home/scnethr2601a10/
 ├── models/
-│   ├── Kimi-Linear-48B-A3B-Instruct/          92 GB，20 分片
-│   └── MiMo-V2.6-Distill-Qwen-9B/             18 GB
+│   ├── Kimi-Linear-48B-A3B-Instruct/          92 GB，20 分片（现: luql:~/models/ 有同一份）
+│   └── MiMo-V2.6-Distill-Qwen-9B/             18 GB（现: luql:~/models/ 有同一份）
 ├── images/
-│   └── mimo-sglang-bw10000_1.1.1.tar          31 GB（podman load 用，避免每次 pull）
+│   └── mimo-sglang-bw10000_1.1.1.tar          31 GB（该目录实测为空；现: luql:~/work/imgstore/*.tar.gz）
 ├── work/
 │   ├── kimi/           Kimi 件的 env.log / smoke.log / server.log / bench/
 │   ├── opt/            MiMo SGLang 优化后的全量基准
@@ -29,13 +34,15 @@
 └── probe/              最早的裸机探测日志
 ```
 
-## 迁移现状
+## 迁移现状（2026-11-25 更新）
 
 - ✅ **有效产物已随本仓库进入 Git**（`models/*/logs/`、`models/*/bench/`）
-- ✅ **镜像已归档（3 个文件，30 GB）**：`/public/home/luql/archive/zoo-dcu-2026-11/images/`（见 `docs/ARCHIVE-SUMMARY.md`）
-- ✅ **依赖 wheel / 源码已归档**：`/public/home/luql/archive/zoo-dcu-2026-11/assets/` + `/public/home/luql/archive/zoo-dcu-2026-11/sources/`
-- ⬜ 权重（194 GB）**不归档**：ModelScope 24 MB/s 可重下，备份无意义
-- ⬜ 若要整体归档到永久账号：需先恢复永久账号在该集群的 SSH 密钥
+- ✅ **镜像全部在 luql 名下**：`/public/home/luql/work/imgstore/`（4 个文件，约 60 GiB）
+- ✅ **依赖 wheel / 源码在 luql 名下**：`~/wheels/`（auk-fix / fa310 / qi2 / trident / omni-fix / wan-fix）、`~/src/`（AuK-src / Wan2.1-src）
+- ✅ **权重在 luql 名下**：`~/models/`（15 个被引用的模型，2026-11-25 迁入）
+- ✅ **零引用孤儿已清理**：2026-11-25 删掉 502 GB（DeepSeek-V4.1-Flash 476G / Qwen2.5-7B 15G / vjepa2 11G）
+- ⬜ `AuK-Flash` 主权重两账号均无（确认丢失），条目暂不可重跑，恢复方法见其 `env.sh`
+- ⬜ 若要整体归档到永久账号：需先恢复该集群的 SSH 密钥
   （实测 `luql@zzeshell.scnet.cn` 报 `Permission denied (publickey)`）
 
 ## 价值排序（本项目的第一原则）

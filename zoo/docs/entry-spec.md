@@ -112,7 +112,7 @@ models/<org>__<model>__<card>__<framework>[__<precision>]/
 现有可用归档：
 
 - `luql:/public/home/luql/work/imgstore/vllm021.tar`（vLLM 0.21，31 GB 未压缩）
-- `scnethr2601a10:/public/home/scnethr2601a10/zoo-images/*.tar.gz`（vLLM 0.20 / mimo-sglang / Music3）
+- `/public/home/luql/work/imgstore/*.tar.gz`（vLLM 0.20 / mimo-sglang / Music3；2026-11-25 起全部收拢到 luql 名下）
 
 `submit.slurm` 的加载顺序是「本地 tar → 失败才 pull」，所以设对了就不再依赖网络。
 tar 里的 tag 必须与 `IMAGE` 完全一致（`tar xOf <tar> repositories` 可查），否则 load 后要 retag。
