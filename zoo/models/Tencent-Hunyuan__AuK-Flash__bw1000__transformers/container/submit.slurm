@@ -19,6 +19,16 @@ PD="podman --root /tmp/pr-$JID --runroot /tmp/prr-$JID --storage-driver overlay 
 FREE=$(df -Pm /tmp | awk 'NR==2{print int($4/1024)}')
 echo "[host] node=$(hostname) tmp_free=${FREE}G"
 [ "$FREE" -lt 70 ] && { echo "[host] NOT_ENOUGH_SPACE exit 42"; exit 42; }
+
+# 权重缺失时尽早失败：2026-11-25 复核确认 auk_flash.safetensors 已丢失，env.sh 里留空串。
+# 不拦的话 podman 会因 `-v "":...` 报一个与真因无关的错误。
+if [ -z "${HOST_MODEL_PATH:-}" ] || [ ! -d "${HOST_MODEL_PATH}" ]; then
+  echo "[host] MODEL_WEIGHTS_MISSING: HOST_MODEL_PATH='${HOST_MODEL_PATH:-}'"
+  echo "[host] 本条目的主权重 auk_flash.safetensors 在集群上已不存在，无法运行。"
+  echo "[host] 恢复方法见 env.sh 顶部注释（ModelScope 重新下载约 6.3 GiB）。"
+  exit 1
+fi
+
 mkdir -p "$XDG_RUNTIME_DIR"; chmod 700 "$XDG_RUNTIME_DIR"
 if [ -n "${HOST_IMAGE_TAR:-}" ] && [ -s "$HOST_IMAGE_TAR" ]; then $PD load -i "$HOST_IMAGE_TAR" >/tmp/load-$JID.log 2>&1; fi
 $PD image exists "$IMAGE" 2>/dev/null || $PD pull --tls-verify=false --cert-dir=/tmp/emptycerts "$IMAGE" >/tmp/load-$JID.log 2>&1

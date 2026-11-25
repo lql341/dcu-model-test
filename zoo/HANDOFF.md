@@ -237,14 +237,27 @@ git log --oneline -1 -- models/Qwen__Qwen3-VL-8B-Instruct__bw1000__vllm  # 期�
    | `models/Qwen2.5-7B-Instruct` | 15 GB | 全仓库 grep 0 命中 |
    | `models/vjepa2` | 11 GB | 全仓库 grep 0 命中 |
 
-**遗留（本轮未做，按用户指示"权重不用迁"）**：
+**残留已全部清零（2026-11-25 二次收口）**：`grep '^export .*scnethr2601a10' models/*/env.sh` 现在**零命中**，
+66 处运行时路径全部指向 `/public/home/luql`。二次收口补做了：
+
+| 项 | 处置 |
+| --- | --- |
+| Music3 `CONDITIONS_HOST` | 迁到 `luql/work/official-conds/music3.jsonl`（53,128 B，`cmp` 完全一致）。**更正上一版误判**：该文件并非 ABSENT，此前用 `files --path <文件>` 查目录才报错 |
+| Music3 `HARNESS_HOST` | 迁到 `luql/work/music3-hygon`（79 文件 / 513,701 B；逐文件 `cmp` 0 差异） |
+| ForcedAligner 的 `WHEELS_HOST` | 迁到 `luql/wheels/fa310`（7 文件 / 38,040,896 B，`diff -r` 一致） |
+| AuK-Flash 的 `WHEELS_HOST` / `WHEELS_BIN_HOST` | 改指 `luql/wheels/auk-fix`（与源 53 文件同名同大小） |
+| AuK-Flash 的 `AUK_SRC_HOST` | 改指 `luql/src/AuK-src` |
+
+> `music3-hygon` 里 10 个符号链接全是**相对路径或容器内路径**（`/models/Music3/...` 是容器挂载点），
+> 没有指向原账号的绝对路径。`diff -r` 会报 12 行差异，那是两边都存在的 6 个断链（源目录本来就断），
+> 逐文件 `cmp` 为 0 差异。
+
+**仍未解决（2 项，均已在代码里显式拦截，不会静默失败）**：
 
 | 项 | 现状 |
 | --- | --- |
-| `AuK-Flash` 主权重 `auk_flash.safetensors` | **两个账号下均已找不到，确认丢失**，本条目无法重跑；`env.sh` 已加醒目注释 |
-| Music3 `CONDITIONS_HOST` | 指向的 `scnethr.../official-conds/music3.jsonl` 实测 ABSENT；仓库内有 `conditions/music3.jsonl` 可替代 |
-| Music3 `HARNESS_HOST`、ForcedAligner/AuK-Flash 的 `WHEELS_HOST`、AuK-Flash 的 `AUK_SRC_HOST` | 仍指向废弃账号（可读但不该依赖） |
-| `HY-World-2.0` 镜像 | 从未归档，Harbor 也不可达 → 该条目当前无法重跑（已在 MISSING.md 标注） |
+| `AuK-Flash` 主权重 `auk_flash.safetensors` | **两账号均无，确认丢失**。`HOST_MODEL_PATH=""`，`submit.slurm` 开头会打印 `MODEL_WEIGHTS_MISSING` 并退出；恢复方法写在 env.sh 顶部（ModelScope 约 6.3 GiB，8 文件） |
+| `HY-World-2.0` 镜像 | 从未归档 + Harbor 不可达 → 该条目当前无法重跑（MISSING.md 已标注） |
 
 ---
 

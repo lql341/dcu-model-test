@@ -119,3 +119,54 @@ python3 "$S" --region 20091 files --path /public/home/luql/work/imgstore
 # 权重是否齐（期望 15 个被引用目录）
 python3 "$S" --region 20091 files --path /public/home/luql/models
 ```
+
+---
+
+## 七、二次收口：残留清零（同日稍后）
+
+第一轮留了 6 处运行时路径仍指向 `scnethr2601a10`。本轮全部处理完，`grep '^export .*scnethr2601a10'`
+在 `models/*/env.sh` 中**零命中**，66 处运行时路径全指向 `/public/home/luql`。
+
+| 资产 | 体积 | 校验 |
+| --- | --- | --- |
+| `wheels/fa310` | 7 文件 / 38,040,896 B | `diff -r` 一致 |
+| `work/music3-hygon` | 79 文件 / 513,701 B | 逐文件 `cmp` 0 差异 |
+| `work/official-conds/music3.jsonl` | 53,128 B | `cmp` 完全一致 |
+| `wheels/auk-fix` | 53 文件 / 103.1 MiB | 与源**同名同大小**，未复制（luql 已有），直接改指 |
+| `AuK-src` | 30.35 MB | 已在第一轮迁到 `luql/src/`，本轮仅改指针 |
+
+### 更正上一版的一个误判
+
+第一轮写「Music3 的 `CONDITIONS_HOST` 指向的 `music3.jsonl` 实测 ABSENT」——**这是错的**。
+`scnet.py files --path <文件路径>` 只能列**目录**，对文件会返回 `911020 File does not exist`。
+我把这个报错当成了"文件不存在"。实际该文件存在（53,128 B），与仓库内
+`conditions/music3.jsonl`（60 条条件）是同一份。
+
+**教训**：判断单个文件是否存在，用 `files --path <父目录>` 看列表，或 `download` 试取；
+不要拿 `files` 直接指向文件然后按报错下结论。
+
+### `music3-hygon` 的 diff 差异不是问题
+
+`diff -r` 报 12 行，但**逐文件 `cmp` 为 0 差异**。原因：目录里有 6 个本来就断的符号链接
+（`runtime/backbone/*.safetensors -> /models/Music3/...`，那是**容器内**挂载点，在宿主机上本就不存在），
+`diff` 对两边各报一次、共 12 行。
+
+已核查全部 10 个符号链接，**没有任何指向原账号的绝对路径**：
+
+```
+.venv/bin/python -> python3                     相对
+.venv/bin/python3 -> /usr/bin/python3            绝对，但系统路径
+.venv/bin/python3.10 -> python3                  相对
+.venv/lib64 -> lib                               相对
+runtime/backbone/*.safetensors -> /models/Music3/...   容器内挂载点（宿主机本就断链）
+server.log -> logs/server-20261105T025506Z.log   相对
+```
+
+### 一处操作失误（已清理）
+
+我一度误判「要把 AuK-Flash 权重下回来」，往 `/tmp/aukflash` 下载 5.7 GiB 主权重。
+本机 `/tmp` 是 **tmpfs 只有 5.8 GB**，下到 2.4 GB 就涨到 98%。已 `pkill` + `rm -rf` 清理，
+`/tmp` 回到 58%（剩余 3.4 GB 是原有的 `dcuenv` 2.5G 与 `py310env` 819M，非本次产生）。
+
+**结论：AuK-Flash 权重按用户指示不补**，`HOST_MODEL_PATH=""` + `submit.slurm` 显式拦截
+（打印 `MODEL_WEIGHTS_MISSING` 退出 1），恢复步骤写在 env.sh 顶部注释里。

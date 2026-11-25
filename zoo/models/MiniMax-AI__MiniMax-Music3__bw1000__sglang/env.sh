@@ -23,7 +23,9 @@ export ACOUSTIC_PRECISION="fp32"   # 声学（flow-matching/DAV）走 fp32，与
 export PORT=8000
 
 # 官方条件（60 条：中英各 10 歌词 × 3 seed）
-export CONDITIONS_HOST="/public/home/scnethr2601a10/work/official-conds/music3.jsonl"
+# 2026-11-25 修正：原值指向 scnethr2601a10（已废弃账号）。文件已服务端 cp -a 到 luql 名下，
+# 字节数一致（53128 B / cmp 完全一致）；仓库内 conditions/music3.jsonl 是同一份 60 条清单。
+export CONDITIONS_HOST="/public/home/luql/work/official-conds/music3.jsonl"
 export MAX_NEW_TOKENS=750          # 条件清单 params.max_new_tokens（≤9000 帧上限）
 export MEM_FRAC=0.5
 export MAX_LEN=10240
@@ -31,4 +33,6 @@ export LOAD_TIMEOUT=1800
 
 # BW 适配 harness（来自镜像 /tmp/music3-hygon，已归档到 zoo-images/assets/music3-hygon-harness.tar.gz）
 # 它负责：打兼容 patch、建 venv、起 OpenAI 兼容服务（/v1/audio/speech）
-export HARNESS_HOST="/public/home/scnethr2601a10/work/music3-hygon"
+# 2026-11-25 修正：harness 已服务端 cp -a 到 luql 名下（79 文件 / 513,701 B，
+# 逐文件 cmp 0 差异；10 个符号链接均为相对/容器内路径，与源完全一致）。
+export HARNESS_HOST="/public/home/luql/work/music3-hygon"

@@ -20,4 +20,6 @@ export PORT=30000
 export TASK="align"          # 非 serving 任务：批量跑 30 条，输出词级时间戳
 export BATCH_SIZE=1
 export LOAD_TIMEOUT=1800
-export WHEELS_HOST="/public/home/scnethr2601a10/wheels/fa310"
+# 2026-11-25 修正：原值指向 scnethr2601a10（已废弃账号）。轮子已服务端 cp -a 到 luql 名下
+# （7 文件 / 38,040,896 B，diff -r 一致）。
+export WHEELS_HOST="/public/home/luql/wheels/fa310"
