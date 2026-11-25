@@ -12,7 +12,9 @@ export HOST_MODEL_PATH="/public/home/luql/models/Trident-Qwen3VL-2B"
 # 复用 SGLang 镜像：DTK 26.04 + DCU 版 torch 2.9；服务本身只依赖 torch + transformers，
 # 不需要 SGLang/vLLM 的推理后端。
 export IMAGE="image.ac.com:5000/dcu/linshp/base/mimo-sglang-bw10000:1.1.1"
-export HOST_IMAGE_TAR="/public/home/scnethr2601a10/zoo-images/mimo-sglang-bw10000_1.1.1.tar.gz"
+# 2026-11-25 迁移：镜像 tar.gz 已在 luql 名下（与服务端源逐字节一致 + gzip -t 通过），
+# 不再依赖已被移出分区的 scnethr2601a10 账号。
+export HOST_IMAGE_TAR="/public/home/luql/work/imgstore/mimo-sglang-bw10000_1.1.1.tar.gz"
 export FRAMEWORK="transformers"
 export FRAMEWORK_VERSION="transformers 4.57.1 + 自建 HTTP 服务"
 export CARD="BW1000"

@@ -29,11 +29,15 @@ git log --oneline -1 -- models/Qwen__Qwen3-VL-8B-Instruct__bw1000__vllm  # 期�
 > ```bash
 > # ① 镜像 tar 是否存在（Harbor 已不可达，本地 tar 是唯一来源）
 > grep -h '^export HOST_IMAGE_TAR=' models/*/env.sh | sort | uniq -c
-> #   期望：路径都能对上 /public/home/scnethr2601a10/zoo-images/ 或 luql/work/imgstore/
-> #   2026-11-22 已批量修正为真实路径；HY-World-2.0 无归档（会显示警告注释）
+> #   期望：全部指向 /public/home/luql/work/imgstore/（2026-11-25 已全部迁移到 luql 名下）
+> #         HY-World-2.0 为空串（该镜像从未归档，条目当前不可重跑）
 >
 > # ② 权重是否已在集群
 > python3 "$S" --region 20091 files --path /public/home/luql/models
+> #   期望：15 个被引用的模型目录齐全（2026-11-25 已清掉 3 个零引用孤儿，见 §2.7）
+>
+> # ③ 家目录余量（2026-11-25 清理后为 595 GB / 60% 已用，低于 100 GB 就该清）
+> python3 "$S" --region 20091 quota
 > ```
 
 **本目录的地图**：
@@ -41,7 +45,7 @@ git log --oneline -1 -- models/Qwen__Qwen3-VL-8B-Instruct__bw1000__vllm  # 期�
 | 路径 | 是什么 |
 | --- | --- |
 | `HANDOFF.md` | 本文件。进度、决策、待办、命令 |
-| `docs/gotchas.md` | **63 条踩坑**，按隐蔽度排序。踩之前先搜这里 |
+| `docs/gotchas.md` | **64 条踩坑**，按隐蔽度排序。踩之前先搜这里 |
 | `INDEX.md` | 实测索引（由 `meta.json` 生成，**勿手改**） |
 | `models/<org>__<model>__<card>__<framework>/` | 21 个条目，每个都是自包含的复现单元 |
 | `sweeps/` | 调优过程与结果记录（含本次集群出网、Qwen3-VL 两份证据） |
@@ -62,8 +66,8 @@ git log --oneline -1 -- models/Qwen__Qwen3-VL-8B-Instruct__bw1000__vllm  # 期�
 | 6 档基准 | **9 个条目**（MiMo / Kimi / Recon2Reason / RoboBrain 各双引擎；+ Qwen3-VL-8B × vLLM，2026-11-22 新增） |
 | 自建运行时 | **1 个**（Trident-Qwen3VL-2B：OpenAI 兼容 embedding 服务，两引擎均不支持该架构） |
 | 阻塞 | **4 个**（Trident × SGLang/vLLM 架构未注册；Recon2Reason/RoboBrain × SGLang 于 2026-11-15 封存，见 gotcha #58） |
-| 踩坑 | **63 条**（`docs/gotchas.md`，按隐蔽度排序） |
-| 归档 | 历史口径 5 镜像 55 GB（规范前 31 GB）+ assets + sources + products；**2026-11-21 实测原 `archive/` 目录已不可见，镜像本体仍在原账号——见 §2.6**；`SHA256SUMS` 11/11 为历史校验结果 |
+| 踩坑 | **64 条**（`docs/gotchas.md`，按隐蔽度排序） |
+| 归档 | 历史口径 5 镜像 55 GB（规范前 31 GB）+ assets + sources + products；**2026-11-21 实测原 `archive/` 目录已不可见——见 §2.6**。**2026-11-25 已把镜像本体全部收拢到 `luql:~/work/imgstore/`（60 GB）**，不再依赖 `scnethr2601a10` |
 | 代码同步 | GitHub **`lql341/dcu-model-test`**（本目录是它的 `zoo/` 子目录）= 本地。改完跑 `tools/publish.sh`。旧仓 `scnet-dcu-model-zoo` 已归档只读，**不要再推** |
 | **集群通道（2026-11-22 变化）** | ⚠️ **SSH 与集群外网双双失效**：`ssh luql@zzeshell.scnet.cn -p 65032` 报 `Permission denied (publickey)`；集群无公网路由（gotcha #60）。**`tools/sync_remote.sh` 与 `docs/entry-spec.md` §8 的 rsync/scp 流程已不可用**，作业提交与文件收发一律走 `scnet.py`（见 §7） |
 
@@ -108,7 +112,7 @@ git log --oneline -1 -- models/Qwen__Qwen3-VL-8B-Instruct__bw1000__vllm  # 期�
 | 镜像 | 5 个 tar.gz（55 GB，历史口径） | 原 `archive/images/` 已不可见；现存本体散落在原账号，见 §2.6 |
 | 源码 | AuK / Wan2.1 / OmniWeaving | 原 `archive/sources/` 已不可见；上游可重新 clone（见仓库根 `sources/`，不入库） |
 | 轮子 | cp310 多套（auk-fix / qi2 / omni-fix / wan-fix / trident） | 原 `archive/assets/` 已不可见；`models/*/wheels/README.md` 有清单 |
-| 经验 | 63 条踩坑 + 4 条有效硬约束（1 条已推翻） | `docs/gotchas.md`、`docs/REPORT.md` §4 |
+| 经验 | 64 条踩坑 + 4 条有效硬约束（1 条已推翻） | `docs/gotchas.md`、`docs/REPORT.md` §4 |
 
 **关键性能数字（引用以此为准）**
 
@@ -207,6 +211,40 @@ git log --oneline -1 -- models/Qwen__Qwen3-VL-8B-Instruct__bw1000__vllm  # 期�
 `docs/ARCHIVE-SUMMARY.md`/`docs/REPORT.md` 三个口径并存）。当前因 archive 目录移除，无法实测出与历史值相等的单一数字；
 上表 3 个 tar.gz 合计 ≈29.4 GiB，加上未压缩的 vllm021.tar（≈30.5 GiB）与 assets，是现存本体的实测口径。
 **引用大小时以此为准，并把"archive 目录已不可见、本体在原账号"一并说明，不要只写 55 GB。**
+
+### 2.7 2026-11-25 收口：路径全面迁移到 luql + 家目录清理（**已完成，可引用**）
+
+上一版 HANDOFF 遗留了一个大坑：**权重和镜像路径大多仍指向 `scnethr2601a10`**——该账号 2026-11-07
+已被移出分区，文件随时可能被清。本轮做了三件事：
+
+1. **实测该账号在计算节点仍可读**（作业 1211731/1211883）：`drwx---r-x`，luql 能读镜像 tar 与源码，
+   但**只有 r-x，删不了也不该动**。这解释了为什么此前一直"能用"——不是没问题，是还没被清。
+2. **把运行时依赖全部收拢到 `luql` 名下**（服务端 `cp -a`，逐项校验）：
+
+   | 内容 | 体积 | 校验 |
+   | --- | --- | --- |
+   | AuK-src / Wan2.1-src | 30.4 MB / 5.3 MB | `diff -r` rc=0 |
+   | MiMo / Music3 / ASR / ForcedAligner 权重 | 18.85 / 57.35 / 4.70 / 1.84 GB | 文件数+字节 MATCH、`diff -r` 一致 |
+   | mimo-sglang / vllm0.20 / music3 镜像 tar.gz | 7.89 / 8.68 / 12.79 GiB | 字节 MATCH + sha256(前 512 MiB) 一致 + `gzip -t` OK |
+
+   落点：权重 → `luql/models/<名>/`；源码 → `luql/src/`；镜像 → `luql/work/imgstore/`（合计 60 GB）。
+   18 个 `models/*/env.sh` 已改指新路径（每处附迁移说明注释）。
+3. **删掉零引用孤儿权重 502 GB**（家目录 94% → 60%，可用 94 GB → 595 GB）：
+
+   | 目录 | 体积 | 判据 |
+   | --- | --- | --- |
+   | `models/DeepSeek-V4.1-Flash-1017` | 476 GB | 无 DeepSeek 条目；INDEX/README 未列；HANDOFF 零提及；deepinfer 支线本身"可行性未验证" |
+   | `models/Qwen2.5-7B-Instruct` | 15 GB | 全仓库 grep 0 命中 |
+   | `models/vjepa2` | 11 GB | 全仓库 grep 0 命中 |
+
+**遗留（本轮未做，按用户指示"权重不用迁"）**：
+
+| 项 | 现状 |
+| --- | --- |
+| `AuK-Flash` 主权重 `auk_flash.safetensors` | **两个账号下均已找不到，确认丢失**，本条目无法重跑；`env.sh` 已加醒目注释 |
+| Music3 `CONDITIONS_HOST` | 指向的 `scnethr.../official-conds/music3.jsonl` 实测 ABSENT；仓库内有 `conditions/music3.jsonl` 可替代 |
+| Music3 `HARNESS_HOST`、ForcedAligner/AuK-Flash 的 `WHEELS_HOST`、AuK-Flash 的 `AUK_SRC_HOST` | 仍指向废弃账号（可读但不该依赖） |
+| `HY-World-2.0` 镜像 | 从未归档，Harbor 也不可达 → 该条目当前无法重跑（已在 MISSING.md 标注） |
 
 ---
 
@@ -461,15 +499,23 @@ print(len(d['files']),'files', sum(f['size'] for f in d['files'])/2**30,'GiB')"
 
 **落点约定**：权重统一放 `/public/home/luql/models/<模型名>/`（不加版本号）。
 条目里用 `HOST_MODEL_PATH` 指向它，容器内挂到 `/models/M`。
-家目录约 85% 占用，**搬之前先看 `luql 家目录剩余空间`**，低于 40 GB 先清理（见 `docs/gotchas.md`）。
+家目录余量：**2026-11-25 清理后 595 GB 可用 / 60% 已用**；低于 100 GB 先清理（当前可清的零引用孤儿已清完，见 §2.7）。
 
 **已有权重可直接复用**（不必重新搬）：
-`/public/home/luql/models/` 下有 Kimi、MiMo、Qwen3-VL-8B 等，用 `files` 接口列一下就知道。
+`/public/home/luql/models/` 下有 Kimi、MiMo、Qwen3-VL-8B 等 15 个，用 `files` 接口列一下就知道。
 
 | 模型 | 体积 | 状态 |
 | --- | --- | --- |
 | `Qwen/Qwen3-VL-8B-Instruct` | 16.34 GiB | ✅ **已完成（2026-11-22）**：`models/Qwen__Qwen3-VL-8B-Instruct__bw1000__vllm/`，服务跑通（单图/双图均正确）、6 档全绿。详见 `sweeps/results-qwenvl8b-2026-11-22.md` |
-| `moonshotai/Kimi-VL-A3B-Thinking` | 32.8 GB | 未开始。架构 `KimiVLForConditionalGeneration`，**先确认 vLLM 0.21 是否注册该架构**（0 卡时就能查），否则会白搬 33 GB |
+| `moonshotai/Kimi-VL-A3B-Thinking` | 32.8 GB | **未开始 = 当前首选下一步**。✅ 架构闸门已过：vLLM 0.20 的 `ModelRegistry.get_supported_archs()` 实测含 `KimiVLForConditionalGeneration`（345 个架构，见 `models/moonshotai__Kimi-Linear-48B-A3B-Instruct__bw1000__vllm/README.md:27`），**不必再花 0 卡时验证**，可直接进「本机下载 → upload → 建条目」。余量 595 GB 足够 |
+
+**除 Kimi-VL 外的候选：尚未选定。** 挑选下一个模型前必须先做 0 卡时架构闸门
+（在任意 1 卡作业里跑 `ModelRegistry.get_supported_archs()`，确认目标架构在列再决定搬不搬），
+否则可能白搬 16–33 GB。选型时优先选**能复用现有镜像**（vllm021 / mimo-sglang）的架构，
+省一次 30 GB 的镜像搬运。
+
+> 新增条目照 `docs/entry-spec.md` 走（8 章 README + `env.sh` + `image.lock` + `bench/` + `logs/`），
+> 跑完必须过「四件套」（定义见 §7）。**§8 的 rsync/sbatch 步骤已失效**，改用 §7「OpenAPI 通道」。
 
 **Qwen3-VL-8B 的关键结论（下一条扩模型可直接沿用）**：
 
@@ -593,7 +639,7 @@ python3 tools/gen_report.py    # 重生成 docs/report.html（单文件 HTML 报
 
 ```
 你是接手 lql341/dcu-model-test（zoo/ 子目录）的 agent。先读 zoo/HANDOFF.md 全文，
-再读 docs/gotchas.md（63 条）。本段是前置事实，先接受再动手。
+再读 docs/gotchas.md（64 条）。本段是前置事实，先接受再动手。
 
 【一、你在哪】
 zoo/ 是总仓的子目录，等价于原 scnet-dcu-model-zoo（已归档只读）。
@@ -612,16 +658,22 @@ zoo/ 是总仓的子目录，等价于原 scnet-dcu-model-zoo（已归档只读�
    权重只能本机下载（≈16 MB/s）→ upload（≈10 MB/s），16 GB 约 50 分钟。
    不要在集群上试 snapshot_download 或 pip install，会白等一轮调度。
 3. Harbor 不可达：podman pull 报 no route to host（gotcha #62）。
-   镜像只能从本地 tar 加载：luql:~/work/imgstore/vllm021.tar（31 GB 未压缩）、
-   scnethr2601a10:~/zoo-images/*.tar.gz。新条目务必设 HOST_IMAGE_TAR。
+   镜像只能从本地 tar 加载，**全部在 luql:~/work/imgstore/ 下（60 GB，2026-11-25 已收拢）**：
+   vllm021.tar（31 GB 未压缩）、mimo-sglang / vllm0.20 / music3 的 *.tar.gz。
+   新条目务必设 HOST_IMAGE_TAR。实测 `podman load -i` 直接吃 .tar.gz 没问题（8 GB 约 610 s）。
 
-【三、进度（2026-11-22）】
+【三、进度（2026-11-25 更新）】
 P0 已完成（2026-11-15），不要再从头做。
 P1 已无明显低风险项（Trident 需框架补丁、Wan ulysses 受 xfuser 缺失阻塞，均留证据停手）。
 P2 扩模型：Qwen3-VL-8B × vLLM ✅ 已完成（21 条目，服务+6 档全绿，
    见 sweeps/results-qwenvl8b-2026-11-22.md）。
-下一个候选：Kimi-VL-A3B-Thinking（32.8 GB）。搬之前先 0 卡时确认
-   vLLM 0.21 是否注册了 KimiVLForConditionalGeneration，否则会白搬 33 GB。
+2026-11-25 收口（§2.7）：全部镜像/源码/权重路径已迁到 luql 名下（不再依赖
+   scnethr2601a10），并删掉 502 GB 零引用孤儿权重（配额 94% → 60%，可用 595 GB）。
+下一个首选：Kimi-VL-A3B-Thinking（32.8 GB）。
+   架构闸门已过——vLLM 0.20 注册表实测含 KimiVLForConditionalGeneration
+   （见 models/moonshotai__Kimi-Linear-48B-A3B-Instruct__bw1000__vllm/README.md:27），
+   不用再验，可直接进「本机下载 → upload → 建条目」。
+   其余候选尚未选定，选之前必须先做 0 卡时架构闸门。
 
 【四、交付纪律（硬性）】
 1. 数字必须有原始日志证据；官方没下发的写 [BLOCKED]，绝不填估算值。

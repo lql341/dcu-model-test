@@ -5,12 +5,15 @@
 # ---------- 模型 ----------
 export MODEL_ID="XiaomiMiMo/MiMo-V2.6-Distill-Qwen-9B"
 export MODEL_PATH="/models/MiMo"                       # 容器内挂载点
-export HOST_MODEL_PATH="/public/home/scnethr2601a10/models/MiMo-V2.6-Distill-Qwen-9B"
+# 2026-11-25 迁移：权重已服务端 cp -a 到 luql 名下（18 文件 / 18.85 GB，diff -r 一致）。
+export HOST_MODEL_PATH="/public/home/luql/models/MiMo-V2.6-Distill-Qwen-9B"
 export SERVED_NAME="mimo-v2.6-9b"
 
 # ---------- 镜像 / 框架 / 卡型 ----------
 export IMAGE="image.ac.com:5000/dcu/linshp/base/mimo-sglang-bw10000:1.1.1"
-export HOST_IMAGE_TAR="/public/home/scnethr2601a10/zoo-images/mimo-sglang-bw10000_1.1.1.tar.gz"
+# 2026-11-25 迁移：镜像 tar.gz 已在 luql 名下（与服务端源逐字节一致 + gzip -t 通过），
+# 不再依赖已被移出分区的 scnethr2601a10 账号。
+export HOST_IMAGE_TAR="/public/home/luql/work/imgstore/mimo-sglang-bw10000_1.1.1.tar.gz"
 export FRAMEWORK="sglang"                              # sglang | vllm
 export CARD="BW1000"                                   # BW1000 | K100-AI（K500-SM 按 K100-AI 计）
 export PRECISION="bf16"                                # bf16 | int8 | int4

@@ -4,11 +4,16 @@
 # 与 chat 模型的关键差异：必须 --is-embedding，接口是 /v1/embeddings 而非 /v1/chat/completions
 export MODEL_ID="OpenBMB/Trident-Qwen3VL-2B"
 export MODEL_PATH="/models/Trident"
-export HOST_MODEL_PATH="/public/home/scnethr2601a10/models/Trident-Qwen3VL-2B"
+# 2026-11-25 修正：原值指向 scnethr2601a10/models/Trident-Qwen3VL-2B，该路径实测 ABSENT
+# （该账号 2026-11-07 已被移出分区）。权重的实际位置是 luql 名下（15 文件 / 3.98 GiB），
+# 与 __transformers 条目一致。
+export HOST_MODEL_PATH="/public/home/luql/models/Trident-Qwen3VL-2B"
 export SERVED_NAME="trident-qwen3vl-2b"
 
 export IMAGE="image.ac.com:5000/dcu/linshp/base/mimo-sglang-bw10000:1.1.1"
-export HOST_IMAGE_TAR="/public/home/scnethr2601a10/zoo-images/mimo-sglang-bw10000_1.1.1.tar.gz"
+# 2026-11-25 迁移：镜像 tar.gz 已在 luql 名下（与服务端源逐字节一致 + gzip -t 通过），
+# 不再依赖已被移出分区的 scnethr2601a10 账号。
+export HOST_IMAGE_TAR="/public/home/luql/work/imgstore/mimo-sglang-bw10000_1.1.1.tar.gz"
 export FRAMEWORK="sglang"
 export CARD="BW1000"
 export PRECISION="bf16"

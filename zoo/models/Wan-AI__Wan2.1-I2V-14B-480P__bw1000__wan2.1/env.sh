@@ -13,14 +13,19 @@ export TASK="i2v-14B"
 # 用 SGLang 镜像：DTK 26.04 + DCU 版 torch 2.9（Wan2.1 官方代码的 flash_attn 会缺失，
 # wan/modules/attention.py 会自动回落到 torch.nn.functional.scaled_dot_product_attention）
 export IMAGE="image.ac.com:5000/dcu/linshp/base/mimo-sglang-bw10000:1.1.1"
-export HOST_IMAGE_TAR="/public/home/scnethr2601a10/zoo-images/mimo-sglang-bw10000_1.1.1.tar.gz"
+# 2026-11-25 迁移：镜像 tar.gz 已在 luql 名下（与服务端源逐字节一致 + gzip -t 通过），
+# 不再依赖已被移出分区的 scnethr2601a10 账号。
+export HOST_IMAGE_TAR="/public/home/luql/work/imgstore/mimo-sglang-bw10000_1.1.1.tar.gz"
 export FRAMEWORK="wan2.1"
 export CARD="BW1000"
 export PRECISION="bf16"
 export PORT=30000
 
 # ---------- 官方代码与依赖 ----------
-export WAN_SRC_HOST="/public/home/luql/archive/zoo-dcu-2026-11/sources/Wan2.1-src"
+# 2026-11-25 修正：原值指向已消失的 luql/archive/zoo-dcu-2026-11/sources/Wan2.1-src。
+# 现指向 luql 名下副本（2026-11-25 从 scnethr2601a10 服务端 cp -a 迁移，
+# diff -r rc=0 完全一致：51 文件 / 5,255,947 B）。
+export WAN_SRC_HOST="/public/home/luql/src/Wan2.1-src"
 # diffusers 复用 Qwen-Image 条目归档的那份（hub 1.33.0 与之配套），纯 Python 依赖单独一套
 export WHEELS_HOST="/public/home/luql/wheels/wan-fix"
 export WHEELS_QI_HOST="/public/home/luql/wheels/qi2"

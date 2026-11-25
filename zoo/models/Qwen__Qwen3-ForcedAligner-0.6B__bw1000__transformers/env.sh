@@ -4,11 +4,14 @@
 # vLLM 亦支持但需 forced_aligner_kwargs，且本任务的输出是"词级时间戳"而非生成文本。
 export MODEL_ID="Qwen/Qwen3-ForcedAligner-0.6B"
 export MODEL_PATH="/models/FA"
-export HOST_MODEL_PATH="/public/home/scnethr2601a10/models/Qwen3-ForcedAligner-0.6B"
+# 2026-11-25 迁移：权重已服务端 cp -a 到 luql 名下（11 文件 / 1.84 GB，diff -r 一致）。
+export HOST_MODEL_PATH="/public/home/luql/models/Qwen3-ForcedAligner-0.6B"
 export SERVED_NAME="qwen3-forcedaligner-0.6b"
 
 export IMAGE="image.ac.com:5000/dcu/linshp/base/vllm0.20-ubuntu22.04-dtk26.04-py3.10_qwen_asr1.7_bw:1.0.0"
-export HOST_IMAGE_TAR="/public/home/scnethr2601a10/zoo-images/vllm0.20-qwen_asr1.7_bw_1.0.0.tar.gz"
+# 2026-11-25 迁移：镜像 tar.gz 已在 luql 名下（与服务端源逐字节一致 + gzip -t 通过），
+# 不再依赖已被移出分区的 scnethr2601a10 账号。
+export HOST_IMAGE_TAR="/public/home/luql/work/imgstore/vllm0.20-qwen_asr1.7_bw_1.0.0.tar.gz"
 export FRAMEWORK="transformers"
 export CARD="BW1000"
 export PRECISION="bf16"

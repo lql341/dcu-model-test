@@ -27,7 +27,9 @@ export MULTIMODAL=1
 # 见 docs/gotchas.md #55。实际生效的旋钮只有下面这一行。
 # ---------- vLLM 专用 ----------
 export CLI_IMAGE="image.ac.com:5000/dcu/linshp/base/mimo-sglang-bw10000:1.1.1"   # 仅压测客户端
-export HOST_CLI_TAR=""
+# 2026-11-25 修正：原为 ""，但 submit.slurm 的压测段仍是双镜像（CLI 容器跑 bench.sh），
+# 空值会让 CLI 镜像只能走已不可达的 Harbor pull → 6 档无法重跑。现指向现存活副本。
+export HOST_CLI_TAR="/public/home/luql/work/imgstore/mimo-sglang-bw10000_1.1.1.tar.gz"
 # 引擎版本说明：vLLM 0.20 的 qwen3_vl.py 里 _get_deepstack_input_embeds 会硬性报错
 #   ValueError: Requested more deepstack tokens than available in buffer: 72 > 67
 # vLLM 0.21 已删除该断言（只做切片），因此本条目用 0.21 镜像。

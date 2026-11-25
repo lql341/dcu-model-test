@@ -5,14 +5,19 @@
 # ---------- 模型 ----------
 export MODEL_ID="XiaomiMiMo/MiMo-V2.6-Distill-Qwen-9B"
 export MODEL_PATH="/models/MiMo"
-export HOST_MODEL_PATH="/public/home/scnethr2601a10/models/MiMo-V2.6-Distill-Qwen-9B"
+# 2026-11-25 迁移：权重已服务端 cp -a 到 luql 名下（18 文件 / 18.85 GB，diff -r 一致）。
+export HOST_MODEL_PATH="/public/home/luql/models/MiMo-V2.6-Distill-Qwen-9B"
 export SERVED_NAME="mimo-v2.6-9b"
 
 # ---------- 镜像 / 框架 / 卡型 ----------
 export IMAGE="image.ac.com:5000/dcu/linshp/base/vllm0.20-ubuntu22.04-dtk26.04-py3.10_qwen_asr1.7_bw:1.0.0"
 export CLI_IMAGE="image.ac.com:5000/dcu/linshp/base/mimo-sglang-bw10000:1.1.1"   # 仅用于压测客户端
-export HOST_CLI_TAR="/public/home/scnethr2601a10/images/mimo-sglang-bw10000_1.1.1.tar"
-export HOST_IMAGE_TAR="/public/home/scnethr2601a10/zoo-images/vllm0.20-qwen_asr1.7_bw_1.0.0.tar.gz"
+# 2026-11-25 修正：原值指向 scnethr2601a10/images/（该目录实测为空，压测必失败）。
+# 现指向 luql 名下的服务端副本（8.48 GB，gzip -t 通过；实测 podman load -i 可直接读 .tar.gz）。
+# 2026-11-25 迁移：镜像 tar.gz 已在 luql 名下（与服务端源逐字节一致 + gzip -t 通过），
+# 不再依赖已被移出分区的 scnethr2601a10 账号。
+export HOST_CLI_TAR="/public/home/luql/work/imgstore/mimo-sglang-bw10000_1.1.1.tar.gz"
+export HOST_IMAGE_TAR="/public/home/luql/work/imgstore/vllm0.20-qwen_asr1.7_bw_1.0.0.tar.gz"
 export FRAMEWORK="vllm"
 export CARD="BW1000"
 export PRECISION="bf16"

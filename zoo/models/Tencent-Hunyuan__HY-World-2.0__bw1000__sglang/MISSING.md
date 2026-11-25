@@ -16,6 +16,7 @@
 
 ## ⚠️ 资产缺口
 
-- `hy-world2-bw-sglang` 镜像**尚未归档**（在 `dcu/acizv7iztz` 名下）。上游删除即不可复现，
-  下次有卡时应 `podman save | gzip` 到 `luql:archive/zoo-dcu-2026-11/images/`。
+- `hy-world2-bw-sglang` 镜像**未归档**（源镜像在第三方账号 `dcu/acizv7iztz` 名下）。上游删除即不可复现。
+  ⚠️ 2026-11-25 复核：该镜像 tar **仍不在** `luql` 名下，且 Harbor 已不可达（gotcha #62），
+  所以本条目当前**无法重跑**——不要再写 `podman save` 到已消失的 `archive/`。
 - harness 已归档（`assets/hyworld2-bw-harness.tar.gz`），但**没有它就没法复现**，与镜像同等重要。

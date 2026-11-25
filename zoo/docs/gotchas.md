@@ -1556,8 +1556,10 @@ done
 ```
 
 **这是近期变化**：2026-11-15 22:48 同一账号还用 `curl -L -C -` 直连下完了 DeepSeek-V4.1
-（85 个文件逐条 OK，见 `luql:~/models/DeepSeek-V4.1-Flash-1017/.dl.progress`）。
+（85 个文件逐条 OK，当时记录在 `luql:~/models/DeepSeek-V4.1-Flash-1017/.dl.progress`）。
 现在同样命令全超时。**历史条目的"ModelScope 直连下载"流程不可照抄。**
+（注：该 DeepSeek 权重 476 GB 已于 2026-11-25 删除——项目里没有它的条目，属零引用孤儿；
+上面这条仅作"当时确实能直连"的历史证据，路径已失效。）
 
 **解法**：权重只能离线搬运——本机下载（实测 16 MB/s）→ `scnet.py upload`（实测 10 MB/s）。
 OpenAPI 的 `upload` **只收单个文件**（传目录报 `local file is not a file`），
@@ -1635,3 +1637,40 @@ load 后 `podman images` 的 Repository:Tag 完全一致，**不需要 retag**�
 
 **判据**：判断压测是否真跑完，看 `round*.jsonl` 是否有 6 行、且有效性校验输出 `all valid`；
 只看容器退出码会被 `verify.py` 的 `[BLOCKED]`（exit 1）掩盖成 `rc=2`。
+
+## 64. "还能跑"不等于"路径没问题"：跨账号依赖会静默腐烂（2026-11-25）
+
+**现象**：21 个条目里 18 个的 `HOST_IMAGE_TAR`、6 个的 `HOST_MODEL_PATH` 都指向 `scnethr2601a10`——
+一个 **2026-11-07 就被移出分区 AllowAccounts** 的账号。但从来没人报错，因为文件系统层面还能读。
+
+**判据**（三层，缺一层就发现不了）：
+
+| 层 | 检查 | 本例结果 |
+| --- | --- | --- |
+| ① 调度器是否认这个账号 | `scontrol show ...` / AllowAccounts | ❌ 不认（11-07 起） |
+| ② 计算节点能否读它的文件 | 在**计算节点**上 `dd if=<file> bs=1 count=1` | ✅ 能读（`drwx---r-x`，others 有 r-x） |
+| ③ 能否写/删 | `ls -ld` 看 others 权限位 | ❌ 只有 r-x，删不了 |
+
+**根因**：权限位是"读"还留着，所以运行时一切正常；但账号已被移出分区、**随时可能被整体回收**。
+只做第 ② 层（"能读"）会得出"没问题"的错误结论。
+
+**解法**：把运行时依赖全部收拢到自己账号。同一文件系统内用**服务端 `cp -a`**（比上传下载快一个数量级）：
+
+```bash
+# 在 1 卡作业里执行（计算节点才能访问两边家目录）
+cp -a /public/home/<other>/models/<name> /public/home/luql/models/<name>
+```
+
+校验不要用 `du -sb` 比目录（目录元数据块会差 4096 的整数倍，导致误判 DIFF），改用：
+
+```bash
+find "$SRC" -type f -printf '%s\n' | awk '{t+=$1}END{print t}'   # 只算常规文件
+diff -r "$SRC" "$DST"                                            # rc=0 才算一致
+```
+
+镜像 tar.gz 额外加 `gzip -t`；大文件加 sha256 抽样（前 512 MiB 即可发现拷贝中断）。
+
+**代价**：本轮 18 个 env.sh + 8 GB 镜像 + 33 GB 权重迁移，约 6 个 1 卡作业（每个 40–300 s）。
+
+**顺带结论**：`podman load -i xxx.tar.gz` **能直接读 gzip**（实测 8 GB 用 610 s，rc=0），
+不需要写成 `gunzip -c | podman load`。仓库里 11 个条目用 `load -i` 读 .gz 是对的。

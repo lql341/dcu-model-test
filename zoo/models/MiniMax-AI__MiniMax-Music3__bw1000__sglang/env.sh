@@ -5,12 +5,16 @@
 
 export MODEL_ID="MiniMaxAI/MiniMax-Music3"
 export MODEL_PATH="/models/Music3"
-export HOST_MODEL_PATH="/public/home/scnethr2601a10/models/MiniMax-Music3"
+# 2026-11-25 迁移：权重已从 scnethr2601a10 服务端 cp -a 到 luql 名下（89 文件 / 57.35 GB，diff -r 一致）。
+# 原账号 2026-11-07 已被移出分区，不应再作为运行时依赖。
+export HOST_MODEL_PATH="/public/home/luql/models/MiniMax-Music3"
 export SERVED_NAME="MiniMaxAI/MiniMax-Music3"
 
 # 镜像：BW 专用（41 层，压缩 12.27 GB），Harbor 上匿名可 pull
 export IMAGE="image.ac.com:5000/dcu/acizv7iztz/base/minimax-music3-bw-sglang:20261031-rc1"
-export HOST_IMAGE_TAR="/public/home/scnethr2601a10/zoo-images/minimax-music3-bw-sglang_20261031-rc1.tar.gz"
+# 2026-11-25 迁移：镜像 tar.gz 已在 luql 名下（与服务端源逐字节一致 + gzip -t 通过），
+# 不再依赖已被移出分区的 scnethr2601a10 账号。
+export HOST_IMAGE_TAR="/public/home/luql/work/imgstore/minimax-music3-bw-sglang_20261031-rc1.tar.gz"
 export FRAMEWORK="sglang"
 export FRAMEWORK_VERSION="0.5.12（镜像内 Hygon 构建）"
 export CARD="BW1000"

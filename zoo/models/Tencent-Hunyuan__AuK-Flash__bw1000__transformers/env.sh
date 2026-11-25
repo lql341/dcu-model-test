@@ -5,16 +5,23 @@
 # 因此本条目试「忽略 pin、用镜像自带 torch」——能否跑通以实测为准。
 export MODEL_ID="Tencent-Hunyuan/AuK-Flash"
 export MODEL_PATH="/models/AuKFlash"
+# ⚠️ 2026-11-25 复核：本条目**当前无法重跑**——主权重 `auk_flash.safetensors`（6.1 GB）
+# 在 luql 与 scnethr2601a10 两个账号下均已找不到（原值 scnethr2601a10/models/AuK-Flash 实测 ABSENT，
+# luql 家目录全量索引中也无该文件）。要重跑需先从 ModelScope 重新下载 6.1 GB 主权重 + 0.6 GB vae。
+# 下面保留原路径作为「曾经的位置」，不要当成可用路径引用。
 export HOST_MODEL_PATH="/public/home/scnethr2601a10/models/AuK-Flash"
+# 编码器权重仍在（已迁移/存在于 luql 名下，18 文件 / 11.17 GiB）；原 scnethr 路径已 ABSENT。
 export ENCODER_PATH="/models/Qwen2.5-Omni-3B"
-export HOST_ENCODER_PATH="/public/home/scnethr2601a10/models/Qwen2.5-Omni-3B"
+export HOST_ENCODER_PATH="/public/home/luql/models/Qwen2.5-Omni-3B"
 export SERVED_NAME="auk-flash"
 
 # 选 SGLang 镜像而非 vLLM 镜像：AuK 的 infer_cli 需要 torchaudio，
 # 该镜像自带 DCU 版 torchaudio 2.9.0+das；vLLM 镜像无 torchaudio，而 PyPI 的 torchaudio
 # 是 CUDA/CPU 构建，装进去与 DCU 版 torch 不匹配。
 export IMAGE="image.ac.com:5000/dcu/linshp/base/mimo-sglang-bw10000:1.1.1"
-export HOST_IMAGE_TAR="/public/home/scnethr2601a10/zoo-images/mimo-sglang-bw10000_1.1.1.tar.gz"
+# 2026-11-25 迁移：镜像 tar.gz 已在 luql 名下（与服务端源逐字节一致 + gzip -t 通过），
+# 不再依赖已被移出分区的 scnethr2601a10 账号。
+export HOST_IMAGE_TAR="/public/home/luql/work/imgstore/mimo-sglang-bw10000_1.1.1.tar.gz"
 export FRAMEWORK="transformers"
 export CARD="BW1000"
 export PRECISION="bf16"

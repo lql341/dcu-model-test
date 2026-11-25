@@ -32,7 +32,8 @@
 ## ⏸ 未完成部分（非材料问题）
 
 - 官方 60 条中 **7 条**因集群账号权限被回收而中断（2026-11-07），产物已归档 53 条到
-  `luql:/public/home/luql/archive/zoo-dcu-2026-11/products/omniweaving/`
+  `luql:archive/zoo-dcu-2026-11/products/omniweaving/`
+  （⚠️ 2026-11-21 复核：该 archive 目录已不可见，53 条产物样本现存于本条目 `official-eval/`）
 - 续跑命令：`sbatch --export=ALL,PROBE_ONLY=0 container/submit.slurm`
 
 ## 体积提示

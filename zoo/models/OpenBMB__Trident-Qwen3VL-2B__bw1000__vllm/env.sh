@@ -5,11 +5,16 @@
 #   ValueError: 'Qwen3VLForEmbedding' is not a registered model
 export MODEL_ID="OpenBMB/Trident-Qwen3VL-2B"
 export MODEL_PATH="/models/Trident"
-export HOST_MODEL_PATH="/public/home/scnethr2601a10/models/Trident-Qwen3VL-2B"
+# 2026-11-25 修正：原值指向 scnethr2601a10/models/Trident-Qwen3VL-2B，该路径实测 ABSENT
+# （该账号 2026-11-07 已被移出分区）。权重的实际位置是 luql 名下（15 文件 / 3.98 GiB），
+# 与 __transformers 条目一致。
+export HOST_MODEL_PATH="/public/home/luql/models/Trident-Qwen3VL-2B"
 export SERVED_NAME="trident-qwen3vl-2b"
 
 export IMAGE="image.ac.com:5000/dcu/linshp/base/vllm0.20-ubuntu22.04-dtk26.04-py3.10_qwen_asr1.7_bw:1.0.0"
-export HOST_IMAGE_TAR="/public/home/scnethr2601a10/zoo-images/vllm0.20-qwen_asr1.7_bw_1.0.0.tar.gz"
+# 2026-11-25 迁移：镜像 tar.gz 已在 luql 名下（与服务端源逐字节一致 + gzip -t 通过），
+# 不再依赖已被移出分区的 scnethr2601a10 账号。
+export HOST_IMAGE_TAR="/public/home/luql/work/imgstore/vllm0.20-qwen_asr1.7_bw_1.0.0.tar.gz"
 export FRAMEWORK="vllm"
 export CARD="BW1000"
 export PRECISION="bf16"

@@ -14,7 +14,9 @@ export SERVED_NAME="auk"
 # 该镜像自带 DCU 版 torchaudio 2.9.0+das；vLLM 镜像无 torchaudio，而 PyPI 的 torchaudio
 # 是 CUDA/CPU 构建，装进去与 DCU 版 torch 不匹配。
 export IMAGE="image.ac.com:5000/dcu/linshp/base/mimo-sglang-bw10000:1.1.1"
-export HOST_IMAGE_TAR="/public/home/scnethr2601a10/zoo-images/mimo-sglang-bw10000_1.1.1.tar.gz"
+# 2026-11-25 迁移：镜像 tar.gz 已在 luql 名下（与服务端源逐字节一致 + gzip -t 通过），
+# 不再依赖已被移出分区的 scnethr2601a10 账号。
+export HOST_IMAGE_TAR="/public/home/luql/work/imgstore/mimo-sglang-bw10000_1.1.1.tar.gz"
 export FRAMEWORK="transformers"
 export CARD="BW1000"
 export PRECISION="bf16"
@@ -28,4 +30,7 @@ export WHEELS_HOST="/public/home/luql/wheels/auk-fix"
 # 现改为按 --python-version 310 --platform manylinux2014_x86_64 重新下载的 cp310 轮子，
 # 单一目录（纯 Python + 二进制混放），不再需要 torchcodec（torchaudio.load 已被 soundfile 替掉）。
 export WHEELS_BIN_HOST="/public/home/luql/wheels/auk-fix"
-export AUK_SRC_HOST="/public/home/luql/archive/zoo-dcu-2026-11/sources/AuK-src"
+# 2026-11-25 修正：原值指向已消失的 luql/archive/zoo-dcu-2026-11/sources/AuK-src。
+# 现指向 luql 名下副本（2026-11-25 从 scnethr2601a10 服务端 cp -a 迁移，
+# diff -r rc=0 完全一致：90 文件 / 30,353,470 B）。
+export AUK_SRC_HOST="/public/home/luql/src/AuK-src"

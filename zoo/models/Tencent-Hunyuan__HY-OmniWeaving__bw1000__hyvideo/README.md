@@ -38,7 +38,9 @@
 
 > **镜像归属说明**：本条目使用的镜像属于**第三方账号**（`dcu/linshp` 或 `dcu/acizv7iztz`），
 > 非本项目构建。已用 `image.lock` 锁定 digest，并在
-> `/public/home/luql/archive/zoo-dcu-2026-11/images/` 保留 tar.gz 归档（sha256 已核对、还原验证通过），
+> **镜像现存位置**（2026-11-25 复核）：`/public/home/luql/work/imgstore/` 与
+> `/public/home/scnethr2601a10/zoo-images/`（原 `archive/zoo-dcu-2026-11/` 已于 2026-11-21
+> 复核不可见，见 HANDOFF §2.6）。tar.gz 归档的 sha256 已核对、还原验证通过，
 > 以应对上游删除仓库。推送到自有命名空间需要 Harbor 凭据，平台不提供自助获取接口（2026-11-11 已确认无法推进）。
 
 ### 3.2 软件包升级

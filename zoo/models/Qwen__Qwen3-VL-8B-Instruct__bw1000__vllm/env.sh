@@ -11,6 +11,8 @@ export IMAGE="image.ac.com:5000/dcu/wqxyyt06/base/vllm0.21.0-ubuntu22.04-dtk2604
 # ⚠️ 2026-11-22：Harbor 在本集群已不可达（connect timeout / no route to host），
 # 且该仓库曾报 artifact not found。**必须**走本地归档：这份 tar 是未压缩态（31 GB），
 # 里面 manifest.json 的 RepoTags 与上面 $IMAGE 完全一致，podman load 后 tag 自动对上。
+# 2026-11-25 迁移：镜像 tar.gz 已在 luql 名下（与服务端源逐字节一致 + gzip -t 通过），
+# 不再依赖已被移出分区的 scnethr2601a10 账号。
 export HOST_IMAGE_TAR="/public/home/luql/work/imgstore/vllm021.tar"
 export FRAMEWORK="vllm"
 export FRAMEWORK_VERSION="0.21.0（vllm0.21.0-ubuntu22.04-dtk2604-py3.10 镜像）"
@@ -29,5 +31,5 @@ export MULTIMODAL=1
 # ---------- vLLM 专用 ----------
 export CLI_IMAGE="image.ac.com:5000/dcu/linshp/base/mimo-sglang-bw10000:1.1.1"   # 仅压测客户端
 # 同样走本地归档（7.9 GB gzip），脚本里会自动 gunzip 流式 load
-export HOST_CLI_TAR="/public/home/scnethr2601a10/zoo-images/mimo-sglang-bw10000_1.1.1.tar.gz"
+export HOST_CLI_TAR="/public/home/luql/work/imgstore/mimo-sglang-bw10000_1.1.1.tar.gz"
 export EXTRA_ARGS="--trust-remote-code --dtype bfloat16 --max-num-seqs $MAX_NUM_SEQS "
